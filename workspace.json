@@ -53,32 +53,9 @@
       },
       "tags": []
     },
-    "models": {
-      "root": "libs/models",
-      "sourceRoot": "libs/models/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "outputs": ["{options.outputFile}"],
-          "options": {
-            "lintFilePatterns": ["libs/models/**/*.ts"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/models"],
-          "options": {
-            "jestConfig": "libs/models/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      },
-      "tags": []
-    },
-    "projetweb-b3": {
-      "root": "apps/projetweb-b3",
-      "sourceRoot": "apps/projetweb-b3/src",
+    "mobile": {
+      "root": "apps/mobile",
+      "sourceRoot": "apps/mobile/src",
       "projectType": "application",
       "targets": {
         "start": {
@@ -90,7 +67,7 @@
         "serve": {
           "executor": "@nrwl/workspace:run-commands",
           "options": {
-            "command": "nx start projetweb-b3"
+            "command": "nx start mobile"
           }
         },
         "run-ios": {
@@ -99,11 +76,11 @@
         },
         "bundle-ios": {
           "executor": "@nrwl/react-native:bundle",
-          "outputs": ["apps/projetweb-b3/build"],
+          "outputs": ["apps/mobile/build"],
           "options": {
-            "entryFile": "apps/projetweb-b3/src/main.tsx",
+            "entryFile": "apps/mobile/src/main.tsx",
             "platform": "ios",
-            "bundleOutput": "dist/apps/projetweb-b3/ios/main.jsbundle"
+            "bundleOutput": "dist/apps/mobile/ios/main.jsbundle"
           }
         },
         "run-android": {
@@ -113,17 +90,17 @@
         "build-android": {
           "executor": "@nrwl/react-native:build-android",
           "outputs": [
-            "apps/projetweb-b3/android/app/build/outputs/bundle",
-            "apps/projetweb-b3/android/app/build/outputs/apk"
+            "apps/mobile/android/app/build/outputs/bundle",
+            "apps/mobile/android/app/build/outputs/apk"
           ],
           "options": {}
         },
         "bundle-android": {
           "executor": "@nrwl/react-native:bundle",
           "options": {
-            "entryFile": "apps/projetweb-b3/src/main.tsx",
+            "entryFile": "apps/mobile/src/main.tsx",
             "platform": "android",
-            "bundleOutput": "dist/apps/projetweb-b3/android/main.jsbundle"
+            "bundleOutput": "dist/apps/mobile/android/main.jsbundle"
           }
         },
         "sync-deps": {
@@ -138,22 +115,22 @@
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["apps/projetweb-b3/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["apps/mobile/**/*.{ts,tsx,js,jsx}"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/projetweb-b3"],
+          "outputs": ["coverage/apps/mobile"],
           "options": {
-            "jestConfig": "apps/projetweb-b3/jest.config.js",
+            "jestConfig": "apps/mobile/jest.config.js",
             "passWithNoTests": true
           }
         }
       }
     },
-    "projetweb-b3-e2e": {
-      "root": "apps/projetweb-b3-e2e",
-      "sourceRoot": "apps/projetweb-b3-e2e/src",
+    "mobile-e2e": {
+      "root": "apps/mobile-e2e",
+      "sourceRoot": "apps/mobile-e2e/src",
       "projectType": "application",
       "targets": {
         "build-ios": {
@@ -204,10 +181,37 @@
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["apps/projetweb-b3-e2e/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["apps/mobile-e2e/**/*.{ts,tsx,js,jsx}"]
           }
         }
       }
+    },
+    "models": {
+      "root": "libs/models",
+      "sourceRoot": "libs/models/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/models/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/models"],
+          "options": {
+            "jestConfig": "libs/models/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
     }
-  }
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/react-native"
+  },
+  "defaultProject": "projetweb-b3"
 }
