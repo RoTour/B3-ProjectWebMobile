@@ -1,0 +1,46 @@
+{
+  "npmScope": "projetweb-b3",
+  "affected": {
+    "defaultBase": "master"
+  },
+  "implicitDependencies": {
+    "package.json": {
+      "dependencies": "*",
+      "devDependencies": "*"
+    },
+    ".eslintrc.json": "*"
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@nrwl/nx-cloud",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "e2e"
+        ],
+        "accessToken": "YTA3ZmViNGQtNTM1Zi00NDViLTg2ODUtNTczZTk4N2JjMjU3fHJlYWQtd3JpdGU="
+      }
+    }
+  },
+  "targetDependencies": {
+    "build": [
+      {
+        "target": "build",
+        "projects": "dependencies"
+      }
+    ]
+  },
+  "projects": {
+    "projetweb-b3": {
+      "tags": []
+    },
+    "projetweb-b3-e2e": {
+      "tags": [],
+      "implicitDependencies": [
+        "projetweb-b3"
+      ]
+    }
+  }
+}
