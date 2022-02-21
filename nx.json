@@ -14,12 +14,7 @@
     "default": {
       "runner": "@nrwl/nx-cloud",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ],
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
         "accessToken": "YTA3ZmViNGQtNTM1Zi00NDViLTg2ODUtNTczZTk4N2JjMjU3fHJlYWQtd3JpdGU="
       }
     }
@@ -38,9 +33,11 @@
     },
     "projetweb-b3-e2e": {
       "tags": [],
-      "implicitDependencies": [
-        "projetweb-b3"
-      ]
+      "implicitDependencies": ["projetweb-b3"]
     }
-  }
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/react-native"
+  },
+  "defaultProject": "projetweb-b3"
 }
