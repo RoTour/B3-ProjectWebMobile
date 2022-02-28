@@ -126,7 +126,8 @@
             "passWithNoTests": true
           }
         }
-      }
+      },
+      "tags": []
     },
     "mobile-e2e": {
       "root": "apps/mobile-e2e",
@@ -147,11 +148,13 @@
         "test-ios": {
           "executor": "@nrwl/detox:test",
           "options": {
-            "detoxConfiguration": "ios.sim.debug"
+            "detoxConfiguration": "ios.sim.debug",
+            "buildTarget": "mobile-e2e:build-ios"
           },
           "configurations": {
             "production": {
-              "detoxConfiguration": "ios.sim.release"
+              "detoxConfiguration": "ios.sim.release",
+              "buildTarget": "mobile-e2e:build-ios:prod"
             }
           }
         },
@@ -169,11 +172,13 @@
         "test-android": {
           "executor": "@nrwl/detox:test",
           "options": {
-            "detoxConfiguration": "android.emu.debug"
+            "detoxConfiguration": "android.emu.debug",
+            "buildTarget": "mobile-e2e:build-android"
           },
           "configurations": {
             "production": {
-              "detoxConfiguration": "android.emu.release"
+              "detoxConfiguration": "android.emu.release",
+              "buildTarget": "mobile-e2e:build-android:prod"
             }
           }
         },
@@ -184,7 +189,9 @@
             "lintFilePatterns": ["apps/mobile-e2e/**/*.{ts,tsx,js,jsx}"]
           }
         }
-      }
+      },
+      "tags": [],
+      "implicitDependencies": ["mobile"]
     },
     "models": {
       "root": "libs/models",
@@ -209,9 +216,5 @@
       },
       "tags": []
     }
-  },
-  "cli": {
-    "defaultCollection": "@nrwl/react-native"
-  },
-  "defaultProject": "projetweb-b3"
+  }
 }
