@@ -28,6 +28,9 @@
     ]
   },
   "projects": {
+    "database": {
+      "tags": []
+    },
     "mobile": {
       "tags": []
     },
