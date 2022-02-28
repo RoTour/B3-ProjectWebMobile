@@ -6,7 +6,8 @@
     "start": "nx serve",
     "start:api": "nx serve api",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "postinstall": "prisma migrate dev"
   },
   "private": true,
   "dependencies": {
@@ -16,6 +17,7 @@
     "@nestjs/platform-socket.io": "^8.3.1",
     "@nestjs/websockets": "^8.3.1",
     "@types/socket.io": "^3.0.2",
+    "@prisma/client": "^3.10.0",
     "react": "17.0.2",
     "react-native": "0.67.2",
     "reflect-metadata": "^0.1.13",

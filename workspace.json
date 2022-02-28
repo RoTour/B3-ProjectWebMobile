@@ -53,6 +53,28 @@
       },
       "tags": []
     },
+    "database": {
+      "root": "libs/database",
+      "sourceRoot": "libs/database/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/database/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/database"],
+          "options": {
+            "jestConfig": "libs/database/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
     "mobile": {
       "root": "apps/mobile",
       "sourceRoot": "apps/mobile/src",
@@ -215,6 +237,7 @@
         }
       },
       "tags": []
+      }
     }
   }
 }
