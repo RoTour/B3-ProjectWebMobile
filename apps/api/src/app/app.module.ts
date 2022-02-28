@@ -3,9 +3,10 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TestingWsModule } from './testing-ws/testing-ws.module';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [TestingWsModule],
+  imports: [TestingWsModule, UserModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@projetweb-b3/database": ["libs/database/src/index.ts"]
+      "@projetweb-b3/database": ["libs/database/src/index.ts"],
+      "@projetweb-b3/dto": ["libs/dto/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
