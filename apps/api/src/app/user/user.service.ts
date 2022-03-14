@@ -1,25 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
-import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
-import * as bcrypt from 'bcrypt';
+import {
+  CreateUserDto,
+  JwtUserContent,
+  SetNameDto,
+  UserBanDto,
+} from '@projetweb-b3/dto';
+import bcrypt from 'bcrypt';
 
+type SecuredUser = Omit<User, 'password'>;
 @Injectable()
 export class UserService {
-
   // private logger = new Logger('UserService');
 
-  constructor(private prisma: PrismaService) {
+  constructor(private prisma: PrismaService) {}
+
+  secure(user: User): SecuredUser {
+    const result: SecuredUser & { password: unknown } = { ...user };
+    delete result.password;
+    return result;
   }
 
-  secure(user: User): User {
-    return { ...user, password: "" }
+  async findOne(email: User['email']) {
+    return this.prisma.user.findFirst({
+      where: { email },
+    });
   }
-
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const password = await bcrypt.hash(createUserDto.password, await bcrypt.genSalt());
-    const user = await this.prisma.user.create({ data: { ...createUserDto, password } });
+    const password = await bcrypt.hash(
+      createUserDto.password,
+      await bcrypt.genSalt()
+    );
+    const user = await this.prisma.user.create({
+      data: { ...createUserDto, password },
+    });
     return { ...user, password: '' };
   }
 
@@ -28,13 +44,15 @@ export class UserService {
       data: { banned: banDto.banned ?? true },
       where: { id: banDto.id },
     });
-    return { ...user, password: '' }
+    return { ...user, password: '' };
   }
 
-  setName(setNameDto: SetNameDto, user: JwtUserContent): Promise<User> {
-    return this.prisma.user.update({
-      data: { name: setNameDto.newName },
-      where: { id: user.id },
-    }).then((user: User) => this.secure(user))
+  setName(setNameDto: SetNameDto, user: JwtUserContent): Promise<SecuredUser> {
+    return this.prisma.user
+      .update({
+        data: { name: setNameDto.newName },
+        where: { id: user.id },
+      })
+      .then((user: User) => this.secure(user));
   }
 }
