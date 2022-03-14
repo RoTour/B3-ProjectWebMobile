@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
 import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
 import { UserService } from './user.service';
 
@@ -18,9 +18,18 @@ export class UserController {
     return this.userService.ban(banDto)
   }
 
-  // TODO: Use Logged in guard
+  // TODO: Use LoggedIn guard
   @Post("/set-name")
   setName(@Body() setNameDto: SetNameDto, @Request() req: Request & { user: JwtUserContent }) {
     return this.userService.setName(setNameDto, req.user);
+  }
+
+  // TODO: Use loggedIn guard
+  @Get('/rooms')
+  // getRooms(@Request() req: Request & { user: JwtUserContent }) {
+  //   return this.userService.getRooms(req.user.id);
+  // }
+  getRooms(@Query('id') userId: string) {
+    return this.userService.getRooms(+userId)
   }
 }

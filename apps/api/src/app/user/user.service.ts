@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Chatroom, User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
 import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
 import * as bcrypt from 'bcrypt';
@@ -36,5 +36,12 @@ export class UserService {
       data: { name: setNameDto.newName },
       where: { id: user.id },
     }).then((user: User) => this.secure(user))
+  }
+
+  async getRooms(userId: number): Promise<Chatroom[]> {
+    return this.prisma.chatroom.findMany({
+      select: { title: true, id: true },
+      where: { users: { some: { id: userId } } }
+    });
   }
 }
