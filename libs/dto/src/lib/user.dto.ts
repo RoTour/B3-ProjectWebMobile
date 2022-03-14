@@ -23,3 +23,8 @@ export class UserBanDto {
   @IsOptional()
   banned = true;
 }
+
+export class SetNameDto {
+  @IsString(defaultValidationOptions)
+  newName!: string;
+}

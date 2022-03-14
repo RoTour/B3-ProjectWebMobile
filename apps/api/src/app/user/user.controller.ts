@@ -1,5 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { CreateUserDto, UserBanDto } from '@projetweb-b3/dto';
+import { Body, Controller, Post, Request } from '@nestjs/common';
+import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -16,5 +16,11 @@ export class UserController {
   @Post('/ban')
   banUser(@Body() banDto: UserBanDto) {
     return this.userService.ban(banDto)
+  }
+
+  // TODO: Use Logged in guard
+  @Post("/set-name")
+  setName(@Body() setNameDto: SetNameDto, @Request() req: Request & { user: JwtUserContent }) {
+    return this.userService.setName(setNameDto, req.user);
   }
 }

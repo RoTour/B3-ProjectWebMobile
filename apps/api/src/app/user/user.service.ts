@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
-import { CreateUserDto, UserBanDto } from '@projetweb-b3/dto';
+import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -11,6 +11,11 @@ export class UserService {
 
   constructor(private prisma: PrismaService) {
   }
+
+  secure(user: User): User {
+    return { ...user, password: "" }
+  }
+
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const password = await bcrypt.hash(createUserDto.password, await bcrypt.genSalt());
@@ -24,5 +29,12 @@ export class UserService {
       where: { id: banDto.id },
     });
     return { ...user, password: '' }
+  }
+
+  setName(setNameDto: SetNameDto, user: JwtUserContent): Promise<User> {
+    return this.prisma.user.update({
+      data: { name: setNameDto.newName },
+      where: { id: user.id },
+    }).then((user: User) => this.secure(user))
   }
 }
