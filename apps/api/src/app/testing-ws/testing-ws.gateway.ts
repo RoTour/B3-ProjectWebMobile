@@ -16,7 +16,7 @@ import { Socket, Server } from 'socket.io';
 })
 export class TestingWsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
   @WebSocketServer()
-  server: Server;
+  server: Server | undefined;
 
   private logger: Logger = new Logger('AppGateway');
 
@@ -42,7 +42,7 @@ export class TestingWsGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @SubscribeMessage('events')
   handleEvents(@MessageBody() data: string): string {
     this.logger.log(data)
-    this.server.emit('events', data)
+    this.server?.emit('events', data)
     return data
   }
 }
