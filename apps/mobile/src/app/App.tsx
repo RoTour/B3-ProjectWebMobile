@@ -1,93 +1,29 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  Image,
-  View,
-  Text,
-  StatusBar,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 // @ts-ignore
 import openURLInBrowser from 'react-native/Libraries/Core/Devtools/openURLInBrowser';
-import Star from './star.svg';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import Login from './components/pages/Login/Login';
+
+const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}
-        >
-          <View style={styles.header}>
-            <Image style={styles.logo} source={require('./logo.png')} />
-            <Text style={styles.heading} testID="heading">
-              Welcome to Mobile
-            </Text>
-          </View>
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step 1 poggers</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>apps/mobile/App.tsx</Text>{' '}
-                to change this screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions /> Alternatively, press{' '}
-                <Text style={styles.highlight}>R</Text> in the bundler terminal
-                window.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <TouchableOpacity
-                accessibilityRole="button"
-                onPress={() => openURLInBrowser('https://nx.dev')}
-                testID="nx-link"
-              >
-                <Text style={styles.sectionDescription}>
-                  Visit <Text style={styles.link}>nx.dev</Text> for more info
-                  about Nx.
-                </Text>
-              </TouchableOpacity>
-
-              <Text style={styles.sectionDescription}>
-                Thank you for using and showing some ♥ for Nx. If you like Nx,
-                please give it a star:
-              </Text>
-
-              <View style={styles.githubStarContainer}>
-                <TouchableOpacity
-                  style={styles.githubStarBadge}
-                  onPress={() => openURLInBrowser('https://github.com/nrwl/nx')}
-                >
-                  <Star width={24} height={24} fill={Colors.dark} />
-                  <Text> Star</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{
+            headerStyle: { backgroundColor: "#080C1E" },
+            headerTitleStyle: { color: "#fff", fontSize: 30, fontWeight: "bold" },
+        }} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
