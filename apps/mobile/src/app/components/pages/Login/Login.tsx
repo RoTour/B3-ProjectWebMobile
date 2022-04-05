@@ -1,14 +1,26 @@
 import React, { FC, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { environnement } from '../../../../environnement';
+import { LoginDto, RegisterDto } from '@projetweb-b3/dto';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../../App';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from '../../../local-storage-keys';
+
+type AuthScreenProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 type LoginProps = Record<string, never>;
 
 const Login: FC<LoginProps> = () => {
+
+  const navigation = useNavigation<AuthScreenProp>()
+
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
-
 
   const [route, setRoute] = useState<'login' | 'register'>('login');
 
@@ -18,18 +30,41 @@ const Login: FC<LoginProps> = () => {
   };
 
   const handleLogin = () => {
-    console.log('email: ', email);
-    console.log('password: ', password);
+    setError('');
+    const payload: LoginDto = { email, password }
+    axios.post(`${environnement.apiBaseUrl}/auth/login`, payload)
+      .then(({ data }: AxiosResponse< { accessToken: string }>) => {
+        console.log(`login success () ${data.accessToken}`);
+        AsyncStorage.setItem(STORAGE_KEYS.authToken, data.accessToken).then(() => {
+          navigation.replace('Rooms');
+        });
+      })
+      .catch((error: AxiosError) => {
+        setError(error.response?.data.message ?? error.message);
+      });
   };
 
   const handleRegister = () => {
     setError('');
-    console.log('email: ', email);
-    console.log('password: ', password);
-    console.log('confirmPassword: ', confirmPassword);
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      return;
     }
+    const payload: RegisterDto = {
+      email: email.toLowerCase(),
+      password,
+      confirmPassword,
+      name: '',
+      username: '',
+    }
+
+    axios.post(`${environnement.apiBaseUrl}/auth/register`, payload)
+      .then(({ data }: AxiosResponse< { accessToken: string }>) => {
+        console.log(`register success () ${data.accessToken}`);
+      })
+      .catch((error: AxiosError) => {
+        setError(error.response?.data.message ?? error.message);
+      });
   };
 
   return <SafeAreaView style={ styles.container }>

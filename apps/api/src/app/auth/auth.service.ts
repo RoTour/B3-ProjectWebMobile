@@ -9,7 +9,7 @@ export class AuthService {
   constructor(private usersService: UserService, private jwtService: JwtService) {}
 
   async validateUser(email: string, pass: string) {
-    const user = await this.usersService.findOne(email);
+    const user = await this.usersService.findOne(email.toLowerCase());
     if (user && (await bcrypt.compare(pass, user.password))) {
       return this.usersService.secure(user);
     }
@@ -33,7 +33,7 @@ export class AuthService {
       throw new BadRequestException('User already exists');
     }
     const user = await this.usersService.create({
-      email: registerDto.email,
+      email: registerDto.email.toLowerCase(),
       password: registerDto.password,
       username: registerDto.username,
       name: registerDto.name,
@@ -42,6 +42,6 @@ export class AuthService {
       id: user.id,
       username: user.username,
     }
-    return this.jwtService.sign(payload);
+    return { accessToken: this.jwtService.sign(payload) };
   }
 }
