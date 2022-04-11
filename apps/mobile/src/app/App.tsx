@@ -25,7 +25,13 @@ const App = () => {
             headerStyle: { backgroundColor: '#080C1E' },
             headerTitleStyle: { color: '#ffffff00', fontSize: 0, fontWeight: 'bold' },
           } }/>
-        <Stack.Screen name="Rooms" component={ RoomSelection }/>
+        <Stack.Screen
+          name="Rooms"
+          component={ RoomSelection }
+          options={ {
+            headerStyle: { backgroundColor: '#080C1E' },
+            headerTitleStyle: { color: '#ffffff' },
+          } }/>
       </Stack.Navigator>
     </NavigationContainer>
   );
