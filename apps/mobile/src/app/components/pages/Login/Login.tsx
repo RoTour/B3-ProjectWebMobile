@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { environnement } from '../../../../environnement';
@@ -15,7 +15,7 @@ type LoginProps = Record<string, never>;
 
 const Login: FC<LoginProps> = () => {
 
-  const navigation = useNavigation<AuthScreenProp>()
+  const navigation = useNavigation<AuthScreenProp>();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -29,15 +29,18 @@ const Login: FC<LoginProps> = () => {
     setRoute(newRouter);
   };
 
+  const setTokenAndNavigate = (token: string) => {
+    AsyncStorage.setItem(STORAGE_KEYS.authToken, token)
+      .then(() => navigation.replace('Rooms'))
+      .catch(() => setError('Erreur lors de la sauvegarde du token'));
+  };
+
   const handleLogin = () => {
     setError('');
-    const payload: LoginDto = { email, password }
-    axios.post(`${environnement.apiBaseUrl}/auth/login`, payload)
-      .then(({ data }: AxiosResponse< { accessToken: string }>) => {
-        console.log(`login success () ${data.accessToken}`);
-        AsyncStorage.setItem(STORAGE_KEYS.authToken, data.accessToken).then(() => {
-          navigation.replace('Rooms');
-        });
+    const payload: LoginDto = { email, password };
+    axios.post(`${ environnement.apiBaseUrl }/auth/login`, payload)
+      .then(({ data }: AxiosResponse<{ accessToken: string }>) => {
+        setTokenAndNavigate(data.accessToken);
       })
       .catch((error: AxiosError) => {
         setError(error.response?.data.message ?? error.message);
@@ -56,16 +59,22 @@ const Login: FC<LoginProps> = () => {
       confirmPassword,
       name: '',
       username: '',
-    }
+    };
 
-    axios.post(`${environnement.apiBaseUrl}/auth/register`, payload)
-      .then(({ data }: AxiosResponse< { accessToken: string }>) => {
-        console.log(`register success () ${data.accessToken}`);
+    axios.post(`${ environnement.apiBaseUrl }/auth/register`, payload)
+      .then(({ data }: AxiosResponse<{ accessToken: string }>) => {
+        setTokenAndNavigate(data.accessToken);
       })
       .catch((error: AxiosError) => {
         setError(error.response?.data.message ?? error.message);
       });
   };
+
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEYS.authToken).then(token => {
+      if (token) navigation.replace('Rooms');
+    });
+  }, [navigation]);
 
   return <SafeAreaView style={ styles.container }>
     <View style={ [styles.displayFlex, styles.margin] }>
@@ -74,11 +83,11 @@ const Login: FC<LoginProps> = () => {
       <Text style={ [styles.selectForm, styles.route, route === 'register' ? styles.activeRoute : styles.inactive] }
             onPress={ () => changeRoute('register') }>Register</Text>
     </View>
-    <View style={[styles.margin, !error ? styles.hidden : null]}>
+    <View style={ [styles.margin, !error ? styles.hidden : null] }>
       <Text style={ styles.error }>{ error }</Text>
     </View>
     <View style={ styles.form }>
-      <Text style={ styles.label }>Login</Text>
+      <Text style={ styles.label }>Email</Text>
       <View>
         <TextInput
           placeholder="Email"
