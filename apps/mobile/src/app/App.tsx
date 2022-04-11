@@ -6,12 +6,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Login from './components/pages/Login/Login';
 import RoomSelection from './components/pages/RoomSelection/RoomSelection';
+import Room, { ChatroomProps } from './components/pages/Room/Room';
 
 const Stack = createNativeStackNavigator();
 
 export type RootStackParamList = {
   Login: undefined;
   Rooms: undefined;
+  Room: ChatroomProps;
 };
 
 const App = () => {
@@ -28,6 +30,13 @@ const App = () => {
         <Stack.Screen
           name="Rooms"
           component={ RoomSelection }
+          options={ {
+            headerStyle: { backgroundColor: '#080C1E' },
+            headerTitleStyle: { color: '#ffffff' },
+          } }/>
+        <Stack.Screen
+          name="Room"
+          component={ Room }
           options={ {
             headerStyle: { backgroundColor: '#080C1E' },
             headerTitleStyle: { color: '#ffffff' },

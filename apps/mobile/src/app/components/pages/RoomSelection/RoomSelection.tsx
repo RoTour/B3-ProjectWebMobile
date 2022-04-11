@@ -1,11 +1,12 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Image, SafeAreaView, ScrollView, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../App';
 import { useNavigation } from '@react-navigation/native';
 import { STORAGE_KEYS } from '../../../local-storage-keys';
 import { Chatroom } from '@prisma/client';
+import { AppCss } from '../../../styles';
 
 type RoomsScreenProp = NativeStackNavigationProp<RootStackParamList, 'Rooms'>;
 
@@ -34,68 +35,28 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
 
   const selectRoom = (room: Chatroom) => {
     console.log(room);
-    // navigation.navigate('Chat', { room });
+    navigation.navigate('Room', { room });
   };
 
   useEffect(() => {
     setRooms(fetchRooms());
   }, []);
 
-  return <SafeAreaView style={ css.bg }>
+  return <SafeAreaView style={ AppCss.bg }>
     <ScrollView>
-      { rooms.map((room) => {
-        return <TouchableOpacity style={ css.flexRow } onPress={ () => selectRoom(room) }>
-          <Image style={ [css.iconImage, css.margin] } source={ require('./default-room-img.jpeg') }/>
-          <Text style={ [css.white, css.bold, css.bigText, css.overflowHidden, css.expand] }
+      { rooms.map((room, idx) => {
+        return <TouchableOpacity style={ AppCss.flexRow } onPress={ () => selectRoom(room) } key={ idx }>
+          <Image style={ [AppCss.iconImage, AppCss.margin] } source={ require('./default-room-img.jpeg') }/>
+          <Text style={ [AppCss.white, AppCss.bold, AppCss.bigText, AppCss.overflowHidden, AppCss.expand] }
                 numberOfLines={ 1 } ellipsizeMode={ 'tail' }>{ room.title }</Text>
         </TouchableOpacity>;
       }) }
     </ScrollView>
-    <TouchableOpacity style={ [css.margin, css.primaryBg] } onPress={ logout }>
-      <Text style={ css.centerText }>Logout</Text>
+    <TouchableOpacity style={ [AppCss.margin, AppCss.primaryBg] } onPress={ logout }>
+      <Text style={ AppCss.centerText }>Logout</Text>
     </TouchableOpacity>
   </SafeAreaView>;
 };
 
 export default RoomSelection;
 
-const css = StyleSheet.create({
-  margin: {
-    margin: 10,
-  },
-  primaryBg: {
-    backgroundColor: '#44d62c',
-  },
-  bg: {
-    backgroundColor: '#080C1E',
-    flex: 1,
-  },
-  white: {
-    color: '#fff',
-  },
-  bold: {
-    fontWeight: 'bold',
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  bigText: {
-    fontSize: 18,
-  },
-  overflowHidden: {
-    overflow: 'hidden',
-  },
-  iconImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
-  flexRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  expand: {
-    flex: 1,
-  },
-});

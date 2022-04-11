@@ -12,6 +12,7 @@
     "@react-navigation/native-stack": "*",
     "axios": "*",
     "class-validator": "*",
-    "@react-native-async-storage/async-storage": "*"
+    "@react-native-async-storage/async-storage": "*",
+    "@prisma/client": "*"
   }
 }
