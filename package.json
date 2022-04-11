@@ -2,9 +2,13 @@
   "name": "projetweb-b3",
   "version": "0.0.0",
   "license": "MIT",
+  "engines": {
+    "node": "16.x.x"
+  },
   "scripts": {
     "start": "nx serve",
     "start:api": "nx serve api",
+    "start:all": "nx run-many --target=serve --projects=api,mobile --parallel=2",
     "build": "nx build",
     "test": "nx test",
     "postinstall": "prisma migrate dev"
@@ -13,12 +17,18 @@
   "dependencies": {
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
+    "@nestjs/jwt": "^8.0.0",
     "@nestjs/passport": "^8.2.1",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/platform-socket.io": "^8.3.1",
     "@nestjs/websockets": "^8.3.1",
     "@prisma/client": "^3.10.0",
+    "@react-native-async-storage/async-storage": "^1.17.3",
+    "@react-native-community/async-storage": "^1.12.1",
+    "@react-navigation/native": "^6.0.10",
+    "@react-navigation/native-stack": "^6.6.1",
     "@types/socket.io": "^3.0.2",
+    "axios": "^0.26.1",
     "bcrypt": "^5.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
@@ -26,6 +36,8 @@
     "passport-local": "^1.0.0",
     "react": "17.0.2",
     "react-native": "0.67.2",
+    "react-native-safe-area-context": "^4.2.4",
+    "react-native-screens": "^3.13.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.0.0",
     "socket.io": "^4.4.1",

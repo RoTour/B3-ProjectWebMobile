@@ -103,3 +103,7 @@ node_modules/
 apps/mobile-e2e/artifacts
 
 *.db
+
+yarn.lock
+package-lock.json
+Podfile.lock
