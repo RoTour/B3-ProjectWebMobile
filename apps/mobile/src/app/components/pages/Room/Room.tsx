@@ -1,10 +1,13 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Chatroom, Message } from '@prisma/client';
-import { Button, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../../App';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppCss } from '../../../styles';
 import ChatBubble from './ChatBubble';
+import axios from 'axios';
+import { environnement } from '../../../../environnement';
+import { JwtUserContent } from '@projetweb-b3/dto';
 
 export type ChatroomProps = {
   room: Chatroom
@@ -12,7 +15,7 @@ export type ChatroomProps = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Room'>;
 
-const Room: FC<Props> = ({ route, navigation }: Props) => {
+const Room: FC<Props> = ({ route }: Props) => {
   const room = route.params.room;
 
   const [currentMsg, setCurrentMsg] = useState<string>('');
@@ -21,31 +24,42 @@ const Room: FC<Props> = ({ route, navigation }: Props) => {
     { id: 2, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 11), text: 'Quetal', userId: 2 },
     { id: 3, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 14), text: 'Affogato', userId: 3 },
   ]);
+  const [user, setUser] = useState<JwtUserContent | undefined>(undefined);
+
 
   const sendMessage = () => {
+    if (!user) return;
     setMessages(prevState => [...prevState, {
       id: Math.max(...prevState.map(it => it.id)) + 1,
       chatroomId: 1,
       createdAt: new Date(),
       text: currentMsg,
-      userId: 1,
+      userId: user.id,
     }]);
     setCurrentMsg('');
   };
 
+  useEffect(() => {
+    axios.get(`${ environnement.apiBaseUrl }/auth`)
+      .then(({ data }: { data: JwtUserContent }) => {
+        setUser(data);
+        console.log(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }, []);
 
   return <SafeAreaView style={ [AppCss.bg] }>
     <Text style={ AppCss.white }>{ room.title }</Text>
-    <ScrollView>
-      { messages.sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map(message => {
-        return <ChatBubble key={ message.id } orientation={ 'left' } text={ message.text }/>;
+    <ScrollView contentContainerStyle={ [AppCss.flexColumn, AppCss.justifyEnd, AppCss.expand, AppCss.margin] }>
+      { user && messages.sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map(message => {
+        return <ChatBubble
+          key={ message.id }
+          orientation={ user.id === message.userId ? 'right' : 'left' }
+          text={ message.text }/>;
       }) }
     </ScrollView>
-    {/*<ScrollView style={ AppCss.expand }>*/ }
-    {/*  { messages.map((message) => {*/ }
-    {/*    return <ChatBubble text={ message.text } orientation={ message.userId === 2 ? 'right' : 'left' }/>;*/ }
-    {/*  }) })*/ }
-    {/*</ScrollView>*/ }
     <View style={ [AppCss.flexRow, AppCss.margin] }>
       <TextInput
         style={ [AppCss.input, AppCss.margin, AppCss.rounded, AppCss.expand] }
@@ -61,5 +75,3 @@ const Room: FC<Props> = ({ route, navigation }: Props) => {
 };
 
 export default Room;
-
-const css = StyleSheet.create({});

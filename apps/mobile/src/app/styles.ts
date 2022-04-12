@@ -54,4 +54,11 @@ export const AppCss = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  alignEnd: {
+    alignItems: 'flex-end',
+  },
+  justifyEnd: {
+    justifyContent: 'flex-end',
+    alignItems: undefined,
+  },
 });

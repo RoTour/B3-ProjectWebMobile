@@ -6,6 +6,11 @@ export class JwtUserContent {
   username!: string;
 }
 
+export class CredentialDto {
+  accessToken!: string;
+  user!: JwtUserContent;
+}
+
 export class LoginDto {
   @IsEmail(defaultValidationOptions)
   email!: string;
