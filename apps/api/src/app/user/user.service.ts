@@ -1,20 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
-import {
-  CreateUserDto,
-  JwtUserContent,
-  SetNameDto,
-  UserBanDto,
-} from '@projetweb-b3/dto';
+import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
 import bcrypt from 'bcrypt';
 
-type SecuredUser = Omit<User, 'password'>;
+export type SecuredUser = Omit<User, 'password'>;
+
 @Injectable()
 export class UserService {
   // private logger = new Logger('UserService');
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {
+  }
 
   secure(user: User): SecuredUser {
     const result: SecuredUser & { password: unknown } = { ...user };
@@ -28,10 +25,16 @@ export class UserService {
     });
   }
 
+  async findOneById(id: User['id']) {
+    return this.prisma.user.findFirst({
+      where: { id },
+    });
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     const password = await bcrypt.hash(
       createUserDto.password,
-      await bcrypt.genSalt()
+      await bcrypt.genSalt(),
     );
     const user = await this.prisma.user.create({
       data: { ...createUserDto, password, banned: false },

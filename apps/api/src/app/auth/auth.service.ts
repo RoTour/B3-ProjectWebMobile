@@ -1,12 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import bcrypt from 'bcrypt';
-import { JwtUserContent, LoginDto, RegisterDto } from '@projetweb-b3/dto';
+import { CredentialDto, JwtUserContent, LoginDto, RegisterDto } from '@projetweb-b3/dto';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UserService, private jwtService: JwtService) {}
+  constructor(private usersService: UserService, private jwtService: JwtService) {
+  }
 
   async validateUser(email: string, pass: string) {
     const user = await this.usersService.findOne(email.toLowerCase());
@@ -16,16 +17,17 @@ export class AuthService {
     return null;
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<CredentialDto> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) throw new NotFoundException('Invalid credentials');
     const payload: JwtUserContent = { username: user.username, id: user.id };
     return {
-      accessToken: this.jwtService.sign(payload)
+      accessToken: this.jwtService.sign(payload),
+      user: payload,
     };
   }
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto): Promise<CredentialDto> {
     if (registerDto.confirmPassword !== registerDto.password) {
       throw new BadRequestException('Passwords do not match');
     }
@@ -41,7 +43,11 @@ export class AuthService {
     const payload: JwtUserContent = {
       id: user.id,
       username: user.username,
-    }
-    return { accessToken: this.jwtService.sign(payload) };
+    };
+    return { accessToken: this.jwtService.sign(payload), user: payload };
+  }
+
+  async decodeToken(token: string): Promise<JwtUserContent | null> {
+    return this.jwtService.decode(token) as JwtUserContent;
   }
 }

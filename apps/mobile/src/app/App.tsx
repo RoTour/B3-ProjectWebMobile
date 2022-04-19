@@ -6,18 +6,21 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Login from './components/pages/Login/Login';
 import RoomSelection from './components/pages/RoomSelection/RoomSelection';
+import Room, { ChatroomProps } from './components/pages/Room/Room';
+import NavigatorWrapper from './NavigatorWrapper';
 
 const Stack = createNativeStackNavigator();
 
 export type RootStackParamList = {
   Login: undefined;
   Rooms: undefined;
+  Room: ChatroomProps;
 };
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <NavigatorWrapper Stack={ Stack }>
         <Stack.Screen
           name="Login"
           component={ Login }
@@ -25,8 +28,21 @@ const App = () => {
             headerStyle: { backgroundColor: '#080C1E' },
             headerTitleStyle: { color: '#ffffff00', fontSize: 0, fontWeight: 'bold' },
           } }/>
-        <Stack.Screen name="Rooms" component={ RoomSelection }/>
-      </Stack.Navigator>
+        <Stack.Screen
+          name="Rooms"
+          component={ RoomSelection }
+          options={ {
+            headerStyle: { backgroundColor: '#080C1E' },
+            headerTitleStyle: { color: '#ffffff' },
+          } }/>
+        <Stack.Screen
+          name="Room"
+          component={ Room }
+          options={ {
+            headerStyle: { backgroundColor: '#080C1E' },
+            headerTitleStyle: { color: '#ffffff' },
+          } }/>
+      </NavigatorWrapper>
     </NavigationContainer>
   );
 };
