@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
-import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
+import {
+  CreateUserDto,
+  JwtUserContent,
+  SetNameDto,
+  UserBanDto,
+} from '@projetweb-b3/dto';
 import bcrypt from 'bcrypt';
 
 export type SecuredUser = Omit<User, 'password'>;
@@ -10,13 +15,25 @@ export type SecuredUser = Omit<User, 'password'>;
 export class UserService {
   // private logger = new Logger('UserService');
 
-  constructor(private prisma: PrismaService) {
-  }
+  constructor(private prisma: PrismaService) {}
 
   secure(user: User): SecuredUser {
     const result: SecuredUser & { password: unknown } = { ...user };
     delete result.password;
     return result;
+  }
+
+  async getPaginated(page: number): Promise<SecuredUser[]> {
+    const found = await this.prisma.user.findMany({
+      take: 10,
+      skip: 10 * page,
+    });
+    return found.map((user) => this.secure(user));
+  }
+
+  async getTotalCount() {
+    const found = await this.prisma.user.count();
+    return found;
   }
 
   async findOne(email: User['email']) {
@@ -34,7 +51,7 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const password = await bcrypt.hash(
       createUserDto.password,
-      await bcrypt.genSalt(),
+      await bcrypt.genSalt()
     );
     const user = await this.prisma.user.create({
       data: { ...createUserDto, password, banned: false },

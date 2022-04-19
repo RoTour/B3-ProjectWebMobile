@@ -2,8 +2,11 @@ import {
   Body,
   Controller,
   Get,
+  ParseIntPipe,
   Post,
+  Query,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -12,17 +15,25 @@ import {
   SetNameDto,
   UserBanDto,
 } from '@projetweb-b3/dto';
-import { LocalGuard } from '../auth/guards/LocalGuard.guard';
+import type { Response } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get()
-  @UseGuards(LocalGuard)
-  getUsers() {
-    return [];
+  @Get('/')
+  @UseGuards(JwtAuthGuard)
+  async getUsers(
+    @Res({ passthrough: true }) res: Response,
+    @Query('page', ParseIntPipe) page: number
+  ) {
+    const totalCount = await this.userService.getTotalCount();
+    console.log(totalCount);
+    res.setHeader('Access-Control-Expose-Headers', 'X-Total-Count');
+    res.setHeader('x-total-count', totalCount);
+    return this.userService.getPaginated(page - 1);
   }
 
   @Post()
