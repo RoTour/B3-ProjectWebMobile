@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   Center,
@@ -7,36 +8,40 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import { LoginDto } from '@projetweb-b3/dto';
-import axios, { AxiosError, AxiosResponse } from 'axios';
 import * as IsEmail from 'email-validator';
 import { SyntheticEvent, useEffect, useState } from 'react';
-import { At, Key } from 'tabler-icons-react';
+import { useHistory } from 'react-router-dom';
+import { AlertCircle, At, Key } from 'tabler-icons-react';
+import useLogin from '../hooks/useLogin';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const onSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
+  const [generalError, setGeneralError] = useState('');
+
+  const { login } = useLogin();
+  const router = useHistory();
+  const onSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setGeneralError('');
     const payload: LoginDto = { email: email, password };
-    // FIXME: The url isn't correct
-    axios
-      .post(`/auth/login`, payload)
-      .then(({ data }: AxiosResponse<{ accessToken: string }>) => {
-        // setTokenAndNavigate(data.accessToken);
-        console.log({ data });
-      })
-      .catch((error: AxiosError) => {
-        if (error.response) {
-          const { data } = error.response;
-          if (data.error) {
-            setEmailError(data.error);
-          }
-        }
+    try {
+      await login(payload);
+      router.push('/dashboard');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      showNotification({
+        title: 'Login failed',
+        message,
+        color: 'red',
       });
+    }
   };
+
   useEffect(() => {
     if (!IsEmail.validate(email)) {
       setEmailError('Email is not valid');
@@ -61,10 +66,20 @@ export default function LoginPage() {
                 <h1>Login</h1>
               </Text>
             </Center>
+            {generalError && (
+              <Alert
+                icon={<AlertCircle size={16} />}
+                title="Bummer!"
+                color="red"
+                sx={{ marginBottom: '1rem' }}
+              >
+                {generalError}
+              </Alert>
+            )}
             <TextInput
               value={email}
               onChange={(e) => setEmail(e.target.value.trim())}
-              label="Username"
+              label="E-Mail"
               required={true}
               error={emailError}
               icon={<At size={14} />}

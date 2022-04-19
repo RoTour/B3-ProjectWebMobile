@@ -1,4 +1,5 @@
-import { AppShell } from '@mantine/core';
+import { AppShell, MantineProvider } from '@mantine/core';
+import { NotificationsProvider } from '@mantine/notifications';
 import Axios from 'axios';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom';
@@ -13,21 +14,25 @@ function Application() {
   return (
     <StrictMode>
       <BrowserRouter>
-        <AppShell
-          padding="md"
-          navbar={<AppNavbar />}
-          header={<AppHeader />}
-          styles={(theme) => ({
-            main: {
-              backgroundColor:
-                theme.colorScheme === 'dark'
-                  ? theme.colors.dark[8]
-                  : theme.colors.gray[0],
-            },
-          })}
-        >
-          <App />
-        </AppShell>
+        <MantineProvider>
+          <NotificationsProvider>
+            <AppShell
+              padding="md"
+              navbar={<AppNavbar />}
+              header={<AppHeader />}
+              styles={(theme) => ({
+                main: {
+                  backgroundColor:
+                    theme.colorScheme === 'dark'
+                      ? theme.colors.dark[8]
+                      : theme.colors.gray[0],
+                },
+              })}
+            >
+              <App />
+            </AppShell>
+          </NotificationsProvider>
+        </MantineProvider>
       </BrowserRouter>
     </StrictMode>
   );
