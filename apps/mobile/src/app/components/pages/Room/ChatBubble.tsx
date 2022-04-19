@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { AppCss } from '../../../styles';
 
 type ChatBubbleProps = {
   text: string;
@@ -8,7 +9,11 @@ type ChatBubbleProps = {
 
 const ChatBubble: FC<ChatBubbleProps> = ({ text, orientation }) => {
   return <View
-    style={ [css.bubble, orientation === 'left' ? [css.alignSelfStart, css.roundedLeft] : [css.alignSelfEnd, css.roundedRight]] }
+    style={ [
+      css.bubble, orientation === 'left' ?
+        [css.alignSelfStart, css.roundedLeft] :
+        [css.alignSelfEnd, css.roundedRight, AppCss.primaryBg],
+    ] }
   >
     <Text>
       { text }
