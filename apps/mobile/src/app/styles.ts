@@ -4,6 +4,9 @@ export const AppCss = StyleSheet.create({
   margin: {
     margin: 10,
   },
+  bigMargin: {
+    margin: 20,
+  },
   primaryBg: {
     backgroundColor: '#44d62c',
   },

@@ -51,8 +51,7 @@ const Room: FC<Props> = ({ route }: Props) => {
   }, []);
 
   return <SafeAreaView style={ [AppCss.bg] }>
-    <Text style={ AppCss.white }>{ room.title }</Text>
-    <ScrollView contentContainerStyle={ [AppCss.flexColumn, AppCss.justifyEnd, AppCss.expand, AppCss.margin] }>
+    <ScrollView contentContainerStyle={ [AppCss.flexColumn, AppCss.justifyEnd, AppCss.expand, AppCss.bigMargin] }>
       { user && messages.sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map(message => {
         return <ChatBubble
           key={ message.id }
