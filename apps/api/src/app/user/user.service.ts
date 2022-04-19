@@ -37,7 +37,7 @@ export class UserService {
       await bcrypt.genSalt(),
     );
     const user = await this.prisma.user.create({
-      data: { ...createUserDto, password },
+      data: { ...createUserDto, password, banned: false },
     });
     return { ...user, password: '' };
   }
