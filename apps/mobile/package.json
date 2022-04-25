@@ -7,6 +7,15 @@
     "@testing-library/react-native": "*",
     "react": "*",
     "react-native": "*",
-    "react-native-svg": "*"
+    "react-native-svg": "*",
+    "react-native-screens": "*",
+    "@react-navigation/native": "*",
+    "react-native-safe-area-context": "*",
+    "@react-navigation/native-stack": "*",
+    "axios": "*",
+    "class-validator": "*",
+    "@react-native-async-storage/async-storage": "*",
+    "@prisma/client": "*",
+    "zustand": "*"
   }
 }
