@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Chatroom, Message } from '@prisma/client';
 import { Button, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../../App';
@@ -33,7 +33,7 @@ const Room: FC<Props> = ({ route }: Props) => {
   const [user, setUser] = useState<JwtUserContent | undefined>(undefined);
 
 
-  const sendMessage = () => {
+  const sendMessage = useCallback(() => {
     if (!user) return;
     setMessages(prevState => [...prevState, {
       id: Math.max(...prevState.map(it => it.id)) + 1,
@@ -43,7 +43,7 @@ const Room: FC<Props> = ({ route }: Props) => {
       userId: user.id,
     }]);
     setCurrentMsg('');
-  };
+  }, [currentMsg, user]);
 
   useEffect(() => {
     axios.get(`${ environnement.apiBaseUrl }/auth`)

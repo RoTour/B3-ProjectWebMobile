@@ -25,6 +25,3 @@ target 'Mobile' do
     nx_post_install(installer)
   end
 end
-
-pod 'RNScreens', :path => '../../../node_modules/react-native-screens/'
-pod 'react-native-safe-area-context', :path => '../../../node_modules/react-native-safe-area-context/'
