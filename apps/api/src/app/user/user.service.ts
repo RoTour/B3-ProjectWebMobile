@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
 import {
   CreateUserDto,
@@ -23,16 +23,33 @@ export class UserService {
     return result;
   }
 
-  async getPaginated(page: number): Promise<SecuredUser[]> {
+  async getPaginated(page: number, search?: string): Promise<SecuredUser[]> {
+    const where: Prisma.UserWhereInput = {
+      OR: [
+        { name: { contains: search } },
+        { email: { contains: search } },
+        { username: { contains: search } },
+      ],
+    };
     const found = await this.prisma.user.findMany({
       take: 10,
       skip: 10 * page,
+      where: search ? where : undefined,
     });
     return found.map((user) => this.secure(user));
   }
 
-  async getTotalCount() {
-    const found = await this.prisma.user.count();
+  async getTotalCount(search?: string) {
+    const optional: { where: Prisma.UserWhereInput } = {
+      where: {
+        OR: [
+          { name: { contains: search } },
+          { email: { contains: search } },
+          { username: { contains: search } },
+        ],
+      },
+    };
+    const found = await this.prisma.user.count(search ? optional : undefined);
     return found;
   }
 
@@ -48,7 +65,7 @@ export class UserService {
     });
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<SecuredUser> {
     const password = await bcrypt.hash(
       createUserDto.password,
       await bcrypt.genSalt()
@@ -56,15 +73,23 @@ export class UserService {
     const user = await this.prisma.user.create({
       data: { ...createUserDto, password, banned: false },
     });
-    return { ...user, password: '' };
+    return this.secure(user);
   }
 
-  async ban(banDto: UserBanDto): Promise<User> {
+  async ban(banDto: UserBanDto): Promise<SecuredUser> {
     const user = await this.prisma.user.update({
-      data: { banned: banDto.banned ?? true },
+      data: { banned: true },
       where: { id: banDto.id },
     });
-    return { ...user, password: '' };
+    return this.secure(user);
+  }
+
+  async unban(unbanDto: UserBanDto): Promise<SecuredUser> {
+    const user = await this.prisma.user.update({
+      data: { banned: false },
+      where: { id: unbanDto.id },
+    });
+    return this.secure(user);
   }
 
   setName(setNameDto: SetNameDto, user: JwtUserContent): Promise<SecuredUser> {

@@ -6,7 +6,6 @@ import * as ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import App from './app/app';
 import AppHeader from './components/Header';
-import AppNavbar from './components/Navbar';
 import { environment } from './environments/environment';
 import './globals.css';
 
@@ -18,7 +17,6 @@ function Application() {
           <NotificationsProvider>
             <AppShell
               padding="md"
-              navbar={<AppNavbar />}
               header={<AppHeader />}
               styles={(theme) => ({
                 main: {

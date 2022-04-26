@@ -27,13 +27,15 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getUsers(
     @Res({ passthrough: true }) res: Response,
-    @Query('page', ParseIntPipe) page: number
+    @Query('page', ParseIntPipe) page: number,
+    @Query('search') search: string
   ) {
-    const totalCount = await this.userService.getTotalCount();
+    console.log(search);
+    const totalCount = await this.userService.getTotalCount(search);
     console.log(totalCount);
     res.setHeader('Access-Control-Expose-Headers', 'X-Total-Count');
     res.setHeader('x-total-count', totalCount);
-    return this.userService.getPaginated(page - 1);
+    return this.userService.getPaginated(page - 1, search);
   }
 
   @Post()
@@ -44,6 +46,11 @@ export class UserController {
   @Post('/ban')
   banUser(@Body() banDto: UserBanDto) {
     return this.userService.ban(banDto);
+  }
+
+  @Post('/unban')
+  unbanUser(@Body() unbanDto: UserBanDto) {
+    return this.userService.unban(unbanDto);
   }
 
   // TODO: Use Logged in guard

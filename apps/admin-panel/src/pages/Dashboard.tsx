@@ -1,17 +1,23 @@
-import { Pagination } from '@mantine/core';
+import { Pagination, Space, TextInput } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
+import { User } from '@prisma/client';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Search } from 'tabler-icons-react';
+import UserList from '../components/UserList';
 import useLogin from '../hooks/useLogin';
 
 export default function DashboardPage() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [search] = useDebouncedValue(searchTerm, 500);
   const { token } = useLogin();
-  useEffect(() => {
-    axios
-      .get<never[]>('/user?page=' + page, {
+  const fetchUsers = useCallback((): Promise<void> => {
+    return axios
+      .get<User[]>(`/user?page=${page}&search=${search}`, {
         headers: {
           Authorization: 'Bearer ' + token,
         },
@@ -28,16 +34,29 @@ export default function DashboardPage() {
           color: 'red',
         });
       });
-  }, [page, token]);
+  }, [page, search, token]);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers, search]);
   return (
     <div>
-      <h1>Hii</h1>
-      {JSON.stringify(users, null, 2)}
-      <Pagination
-        page={page}
-        total={totalPages}
-        onChange={(newPage) => setPage(newPage)}
+      <TextInput
+        icon={<Search />}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
+      <Space h="md" />
+      <UserList users={users} />
+      {totalPages > 1 && (
+        <Pagination
+          page={page}
+          total={totalPages}
+          onChange={(newPage) => setPage(newPage)}
+        />
+      )}
     </div>
   );
 }
