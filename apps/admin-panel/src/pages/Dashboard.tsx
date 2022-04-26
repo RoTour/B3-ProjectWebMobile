@@ -26,18 +26,19 @@ export default function DashboardPage() {
         setUsers(res.data);
         let total = +res.headers['x-total-count'];
         total = Math.ceil(total / 10);
+        if (page > total) {
+          setPage(1);
+        }
         setTotalPages(total);
       })
       .catch((err) => {
+        setPage(1);
         showNotification({
           message: err.response.data.message,
           color: 'red',
         });
       });
   }, [page, search, token]);
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers, search]);

@@ -13,7 +13,7 @@ export default create<LoginState>((set) => ({
   login: async (loginDto: LoginDto) => {
     try {
       const { data } = await axios.post<{ accessToken: string }>(
-        `/auth/login`,
+        `/auth/login?admin=true`,
         loginDto
       );
       set({ token: data.accessToken });
@@ -23,6 +23,11 @@ export default create<LoginState>((set) => ({
       });
     } catch (e) {
       set({ token: null });
+      showNotification({
+        title: 'Login failed',
+        message: e instanceof Error ? e.message : 'Unexpected Error',
+        color: 'red',
+      });
       throw e;
     }
   },

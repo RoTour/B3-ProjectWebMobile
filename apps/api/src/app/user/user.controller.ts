@@ -5,8 +5,9 @@ import {
   ParseIntPipe,
   Post,
   Query,
-  Request,
+  Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -15,24 +16,31 @@ import {
   SetNameDto,
   UserBanDto,
 } from '@projetweb-b3/dto';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
+import { AbilityFactory, Actions } from '../auth/ability/ability.factory';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private abilityFactory: AbilityFactory
+  ) {}
 
   @Get('/')
   @UseGuards(JwtAuthGuard)
   async getUsers(
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request & { user: JwtUserContent },
     @Query('page', ParseIntPipe) page: number,
     @Query('search') search: string
   ) {
-    console.log(search);
+    const user = this.abilityFactory.defineAbility(req.user);
+    if (user.cannot(Actions.MANAGE, 'User')) {
+      throw new UnauthorizedException();
+    }
     const totalCount = await this.userService.getTotalCount(search);
-    console.log(totalCount);
     res.setHeader('Access-Control-Expose-Headers', 'X-Total-Count');
     res.setHeader('x-total-count', totalCount);
     return this.userService.getPaginated(page - 1, search);
@@ -44,20 +52,36 @@ export class UserController {
   }
 
   @Post('/ban')
-  banUser(@Body() banDto: UserBanDto) {
+  @UseGuards(JwtAuthGuard)
+  banUser(
+    @Body() banDto: UserBanDto,
+    @Req() req: Request & { user: JwtUserContent }
+  ) {
+    const user = this.abilityFactory.defineAbility(req.user);
+    if (user.cannot(Actions.MANAGE, 'User')) {
+      throw new UnauthorizedException();
+    }
     return this.userService.ban(banDto);
   }
 
   @Post('/unban')
-  unbanUser(@Body() unbanDto: UserBanDto) {
+  @UseGuards(JwtAuthGuard)
+  unbanUser(
+    @Body() unbanDto: UserBanDto,
+    @Req() req: Request & { user: JwtUserContent }
+  ) {
+    const user = this.abilityFactory.defineAbility(req.user);
+    if (user.cannot(Actions.MANAGE, 'User')) {
+      throw new UnauthorizedException();
+    }
     return this.userService.unban(unbanDto);
   }
 
-  // TODO: Use Logged in guard
   @Post('/set-name')
+  @UseGuards(JwtAuthGuard)
   setName(
     @Body() setNameDto: SetNameDto,
-    @Request() req: Request & { user: JwtUserContent }
+    @Req() req: Request & { user: JwtUserContent }
   ) {
     return this.userService.setName(setNameDto, req.user);
   }

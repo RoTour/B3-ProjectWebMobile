@@ -8,7 +8,6 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
 import { LoginDto } from '@projetweb-b3/dto';
 import * as IsEmail from 'email-validator';
 import { SyntheticEvent, useEffect, useState } from 'react';
@@ -33,12 +32,7 @@ export default function LoginPage() {
       await login(payload);
       router.push('/dashboard');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      showNotification({
-        title: 'Login failed',
-        message,
-        color: 'red',
-      });
+      return;
     }
   };
 

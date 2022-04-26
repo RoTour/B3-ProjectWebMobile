@@ -3,14 +3,21 @@ import { User } from '@prisma/client';
 import axios from 'axios';
 import { useState } from 'react';
 import { Ban, LockOpen } from 'tabler-icons-react';
+import useLogin from '../hooks/useLogin';
 
 export default function UserListItem(props: { user: User }) {
   const [banned, setBanned] = useState(props.user.banned);
+  const token = useLogin((state) => state.token);
   const toggleBanState = async () => {
     const { data } = await axios.post<User>(
       banned ? '/user/unban' : '/user/ban',
       {
         id: props.user.id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
     setBanned(data.banned);
