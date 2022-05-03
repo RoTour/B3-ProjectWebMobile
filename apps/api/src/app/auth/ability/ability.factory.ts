@@ -45,10 +45,10 @@ export class AbilityFactory {
       can(Actions.READ, 'Chatroom', { users: { some: { id: user.id } } });
       can(Actions.READ, 'User');
 
-      can(Actions.UPDATE, 'Message', { userId: user.id });
+      can(Actions.UPDATE, 'Message', { senderId: user.id });
       cannot(Actions.UPDATE, 'Chatroom');
 
-      can(Actions.DELETE, 'Message', { userId: user.id });
+      can(Actions.DELETE, 'Message', { senderId: user.id });
       cannot(Actions.DELETE, 'Chatroom');
 
       cannot(Actions.CREATE, 'User');
