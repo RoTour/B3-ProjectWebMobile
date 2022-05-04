@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Post,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -49,8 +50,9 @@ class Chat implements Chatroom {
 export class ChatController {
   constructor(
     private readonly chatService: ChatService,
-    private readonly userService: UserService
-  ) {}
+    private readonly userService: UserService,
+  ) {
+  }
 
   @ApiCreatedResponse({ description: 'Created', type: Chat })
   @ApiOperation({ summary: 'Create a chat' })
@@ -59,14 +61,15 @@ export class ChatController {
     type: CreateChatDto,
   })
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
   @Post('/')
   async createChat(
     @Body() body: CreateChatDto,
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
-      throw new NotFoundException();
+      throw new UnauthorizedException();
     }
     return await this.chatService.createChat(user.id, body.title);
   }
@@ -74,10 +77,11 @@ export class ChatController {
   @ApiOkResponse({ description: 'Success', type: Chat })
   @ApiOperation({ summary: 'Join a chat' })
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   @Post('/join')
   async joinChat(
     @Body('chatId', ParseIntPipe) chatId: Chatroom['id'],
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
@@ -89,10 +93,11 @@ export class ChatController {
   @ApiOkResponse({ description: 'Success', type: Chat })
   @ApiOperation({ summary: 'Leave a chat' })
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   @Post('/leave')
   async leaveChat(
     @Body('chatId', ParseIntPipe) chatId: Chatroom['id'],
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
@@ -108,10 +113,11 @@ export class ChatController {
     type: 'number',
   })
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   @Get('/:userId')
   async getChatsForUser(
     @Param('userId', ParseIntPipe) userId: User['id'],
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
