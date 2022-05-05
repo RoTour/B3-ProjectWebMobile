@@ -12,7 +12,7 @@ export default function ProtectedRoutes(
   const router = useHistory();
   if (!token) {
     router.push('/');
-    return <></>;
+    return null;
   }
-  return <>{props.children}</>;
+  return <>{props.children} </>;
 }

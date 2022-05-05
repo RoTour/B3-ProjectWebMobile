@@ -14,7 +14,8 @@ model User {
   username  String     @unique
   password  String
   banned    Boolean    @default(false)
-  chatrooms Chatroom[]
+  chats     Chatroom[]
+  avatarUrl String     @default("/cdn/default_avatar.jpeg")
   messages  Message[]
 
   @@map("users")
@@ -25,8 +26,8 @@ model Message {
   text      String
   createdAt DateTime @default(now())
 
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
+  sender   User @relation(fields: [senderId], references: [id])
+  senderId Int
 
   chatroom   Chatroom @relation(fields: [chatroomId], references: [id])
   chatroomId Int
@@ -35,10 +36,11 @@ model Message {
 }
 
 model Chatroom {
-  id       Int       @id @default(autoincrement())
-  title    String
-  users    User[]
-  messages Message[]
+  id           Int       @id @default(autoincrement())
+  title        String
+  messages     Message[]
+  users        User[]
+  thumbnailUrl String    @default("/cdn/default_chat.png")
 
   @@map("chatrooms")
 }

@@ -1,25 +1,34 @@
 import { showNotification } from '@mantine/notifications';
 import { LoginDto } from '@projetweb-b3/dto';
 import axios from 'axios';
-import { useState } from 'react';
+import create from 'zustand';
 
-export default function useLogin() {
-  const [token, setToken] = useState<null | string>(null);
-  const login = async (payload: LoginDto) => {
+interface LoginState {
+  token: string | null;
+  login: (loginDto: LoginDto) => Promise<void>;
+}
+
+export default create<LoginState>((set) => ({
+  token: null,
+  login: async (loginDto: LoginDto) => {
     try {
       const { data } = await axios.post<{ accessToken: string }>(
-        `/auth/login`,
-        payload
+        `/auth/login?admin=true`,
+        loginDto
       );
-      setToken(data.accessToken);
+      set({ token: data.accessToken });
+      console.log(data.accessToken);
       showNotification({
         message: 'Connexion réussie',
       });
-      return null;
     } catch (e) {
-      setToken(null);
+      set({ token: null });
+      showNotification({
+        title: 'Login failed',
+        message: e instanceof Error ? e.message : 'Unexpected Error',
+        color: 'red',
+      });
       throw e;
     }
-  };
-  return { login, token };
-}
+  },
+}));
