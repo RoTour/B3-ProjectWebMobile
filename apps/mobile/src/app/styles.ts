@@ -49,6 +49,10 @@ export const AppCss = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  flexStretch: {
+    display: 'flex',
+    alignItems: 'stretch',
+  },
   rounded: {
     borderRadius: 10,
   },

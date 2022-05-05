@@ -1,15 +1,15 @@
 import React, { FC } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { AppCss } from '../../../styles';
 
 type FABProps = {
   onPress: () => void;
 };
 
 const FAB: FC<FABProps> = ({ onPress }) => {
-  return <TouchableOpacity style={ styles.container } onPress={ () => onPress() }>
+  return <TouchableOpacity style={ [styles.container, AppCss.primaryBg] } onPress={ () => onPress() }>
     <Icon name="plus" size={ 30 } color="#000"/>
-    {/*<Icon name={ 'plus' } size={ 30 } color={ '#000' }/>*/ }
   </TouchableOpacity>;
 };
 

@@ -13,11 +13,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../App';
 import { useNavigation } from '@react-navigation/native';
-import { STORAGE_KEYS } from '../../../local-storage-keys';
 import { Chatroom } from '@prisma/client';
 import { AppCss } from '../../../styles';
 import { unauthorized, unauthorizedEffect } from '../../../interceptors/unauthorized.interceptor';
@@ -28,8 +26,6 @@ import axios, { AxiosResponse } from 'axios';
 import { CreateChatDto } from '@projetweb-b3/dto';
 import { environnement } from '../../../../environnement';
 import { JwtHeaderInterceptor } from '../../../interceptors/jwt-header.interceptor';
-import Room from '../Room/Room';
-
 
 type RoomsScreenProp = NativeStackNavigationProp<RootStackParamList, 'Rooms'>;
 
@@ -50,37 +46,14 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
   const [showCreationModal, setShowCreationModal] = useState<boolean>(false);
   const [roomToLeave, setRoomToLeave] = useState<Chatroom | null>(null);
   const [newGroupName, setNewGroupName] = useState<string>('');
+  const [joinGroupID, setJoinGroupID] = useState<number>(0);
+  const [createOrJoin, setCreateOrJoin] = useState<'create' | 'join'>('create');
+
 
   const { setUnauthorized, resetUnauthorized } = useAxiosInterceptors((state) => ({
     setUnauthorized: state.addInterceptor,
     resetUnauthorized: state.clearInterceptors,
   }));
-
-
-  const logout = () => {
-    AsyncStorage.removeItem(STORAGE_KEYS.authToken).then(() => {
-      navigation.replace('Login');
-    });
-  };
-
-  const DEBUG_RemoveToken = () => {
-    AsyncStorage.removeItem(STORAGE_KEYS.authToken).then(() => {
-      console.log('Token removed');
-    });
-  };
-
-  const DEBUG_SeeToken = () => {
-    AsyncStorage.getItem(STORAGE_KEYS.authToken).then((data) => {
-      console.log(`Token : ${ data }`);
-    });
-  };
-
-  const DEBUG_EmptyStack = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
-  };
 
   const fetchRooms = useCallback(() => {
     axios.get(`${ environnement.apiBaseUrl }/user/rooms`).then((response: AxiosResponse<Chatroom[]>) => {
@@ -144,26 +117,65 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
       });
   }
 
+  const joinRoom = () => {
+    const payload = {
+      chatId: joinGroupID,
+    };
+    axios.post(`${ environnement.apiBaseUrl }/chat/join`, payload)
+      .then(() => {
+        setCreateOrJoin('create');
+        setJoinGroupID(0);
+        setShowCreationModal(false);
+        fetchRooms();
+      })
+      .catch((err) => {
+        notify(err.message);
+      });
+    console.log(payload);
+  };
+
   return <SafeAreaView style={ AppCss.bg }>
     <View>
       <Modal isVisible={ showCreationModal }>
         <View style={ [styles.modalContainer, AppCss.rounded] }>
-          <View style={ [AppCss.expand, AppCss.flexCenter, AppCss.fullWidth] }>
-            {/* Input the new group name */ }
-            <Text style={ { alignSelf: 'flex-start', marginStart: 10 } }>Create a new group</Text>
+          <View style={ [AppCss.flexRow, AppCss.flexCenter] }>
+            <TouchableOpacity onPress={ () => setCreateOrJoin('create') } style={ AppCss.expand }>
+              <Text style={ [AppCss.centerText, createOrJoin === 'create' ? { fontWeight: '800' } : null] }>Create
+                Group</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={ () => setCreateOrJoin('join') } style={ AppCss.expand }>
+              <Text style={ [AppCss.centerText, createOrJoin === 'join' ? { fontWeight: '800' } : null] }>Join
+                Group</Text>
+            </TouchableOpacity>
+          </View>
+          { createOrJoin === 'create' && <View style={ [AppCss.expand, AppCss.flexCenter, AppCss.fullWidth] }>
+            <Text style={ { alignSelf: 'flex-start' } }>Create a new group</Text>
             <TextInput
               placeholder="Group Name"
               value={ newGroupName }
               style={ [styles.input, AppCss.rounded, AppCss.fullWidth] }
               onChangeText={ setNewGroupName }/>
-          </View>
+          </View> }
+          { createOrJoin === 'join' && <View style={ [AppCss.expand, AppCss.flexCenter, AppCss.fullWidth] }>
+            <Text style={ { alignSelf: 'flex-start' } }>Join a group</Text>
+            <TextInput
+              placeholder="Group ID"
+              onChangeText={ value => {
+                const numbers = value.match(/\d+/g)?.join('');
+                if (numbers) setJoinGroupID(+numbers);
+              } }
+              style={ [styles.input, AppCss.rounded, AppCss.fullWidth] }
+            />
+          </View> }
 
           <View style={ styles.buttons }>
             <View style={ AppCss.expand }>
               <Button title="Cancel" onPress={ () => setShowCreationModal(false) }/>
             </View>
             <View style={ AppCss.expand }>
-              <Button title="Create Group" onPress={ () => createRoom() }/>
+              { createOrJoin === 'create' && <Button title="Create Room" onPress={ createRoom }/> }
+              { createOrJoin === 'join' && <Button title="Join Room" onPress={ joinRoom }/> }
+              {/*<Button title="Create Group" onPress={ () => createRoom() }/>*/ }
             </View>
           </View>
         </View>
@@ -202,19 +214,6 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
       }) }
     </ScrollView>
     <FAB onPress={ () => setShowCreationModal(true) }/>
-    {/*<TouchableOpacity style={ [AppCss.margin, AppCss.primaryBg] } onPress={ logout }>*/ }
-    {/*  <Text style={ AppCss.centerText }>Logout</Text>*/ }
-    {/*</TouchableOpacity>*/ }
-    {/*<TouchableOpacity style={ [AppCss.margin, AppCss.primaryBg] } onPress={ DEBUG_EmptyStack }>*/ }
-    {/*  <Text style={ AppCss.centerText }>[DEBUG] Empty stack</Text>*/ }
-    {/*</TouchableOpacity>*/ }
-    {/*<TouchableOpacity style={ [AppCss.margin, AppCss.primaryBg] } onPress={ DEBUG_RemoveToken }>*/ }
-    {/*  <Text style={ AppCss.centerText }>[DEBUG] Remove JWT</Text>*/ }
-    {/*</TouchableOpacity>*/ }
-    {/*<TouchableOpacity style={ [AppCss.margin, AppCss.primaryBg] } onPress={ DEBUG_SeeToken }>*/ }
-    {/*  <Text style={ AppCss.centerText }>[DEBUG] See JWT</Text>*/ }
-    {/*</TouchableOpacity>*/ }
-    {/*{ error && notify(error) }*/ }
   </SafeAreaView>;
 };
 
