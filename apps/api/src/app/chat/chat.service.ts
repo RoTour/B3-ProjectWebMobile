@@ -1,14 +1,31 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Chatroom, User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
+import fs from 'fs/promises';
+import { join, parse } from 'path';
 import { UserService } from '../user/user.service';
-
 @Injectable()
 export class ChatService {
   constructor(
     private prisma: PrismaService,
     private readonly userService: UserService
   ) {}
+
+  async findOne(chatId: Chatroom['id']) {
+    const chat = await this.prisma.chatroom.findFirst({
+      where: {
+        id: chatId,
+      },
+      include: {
+        users: true,
+      },
+    });
+    return chat;
+  }
 
   async createChat(userId: User['id'], chatName: string) {
     const chat = await this.prisma.chatroom.create({
@@ -83,10 +100,29 @@ export class ChatService {
           },
         },
       },
-      include: {
-        users: true,
-      },
     });
     return chats;
+  }
+
+  async uploadAvatar(chatId: Chatroom['id'], file: Express.Multer.File) {
+    const extension = parse(file.originalname).ext;
+    const p = join(__dirname, 'assets', 'chats', chatId.toString()) + extension;
+    try {
+      await fs.writeFile(p, file.buffer);
+
+      const updated = await this.prisma.chatroom.update({
+        where: {
+          id: chatId,
+        },
+        data: {
+          thumbnailUrl: join('cdn', 'chats', chatId.toString()) + extension,
+        },
+      });
+
+      return updated;
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException();
+    }
   }
 }

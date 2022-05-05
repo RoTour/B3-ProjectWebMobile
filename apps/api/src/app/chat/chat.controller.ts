@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -9,11 +10,16 @@ import {
   ParseIntPipe,
   Post,
   Req,
+  UnauthorizedException,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
@@ -21,7 +27,6 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiProperty,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -29,14 +34,10 @@ import { Chatroom, User } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
+import { AddUserToChatDto } from './dto/AddUserToChat.dto';
+import { AvatarUploadDto } from './dto/AvatarUpload.dto';
 import { CreateChatDto } from './dto/CreateChatDto';
-
-class Chat implements Chatroom {
-  @ApiProperty()
-  id!: number;
-  @ApiProperty()
-  title!: string;
-}
+import { Chat } from './schemas/Chat.schema';
 
 @ApiBearerAuth()
 @ApiTags('chat')
@@ -73,10 +74,14 @@ export class ChatController {
 
   @ApiOkResponse({ description: 'Success', type: Chat })
   @ApiOperation({ summary: 'Join a chat' })
+  @ApiBody({
+    required: true,
+    type: AddUserToChatDto,
+  })
   @HttpCode(HttpStatus.OK)
   @Post('/join')
   async joinChat(
-    @Body('chatId', ParseIntPipe) chatId: Chatroom['id'],
+    @Body('chatId', ParseIntPipe) chatId: AddUserToChatDto['chatId'],
     @Req() req: Request & { user: User }
   ) {
     const user = await this.userService.findOneById(req.user.id);
@@ -103,20 +108,40 @@ export class ChatController {
 
   @ApiOkResponse({ description: 'Success', type: [Chat] })
   @ApiOperation({ summary: 'Get all chats for user' })
-  @ApiParam({
-    name: 'userId',
-    type: 'number',
-  })
   @HttpCode(HttpStatus.OK)
-  @Get('/:userId')
-  async getChatsForUser(
-    @Param('userId', ParseIntPipe) userId: User['id'],
-    @Req() req: Request & { user: User }
-  ) {
+  @Get('/')
+  async getChatsForUser(@Req() req: Request & { user: User }) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
       throw new NotFoundException();
     }
     return await this.chatService.getChatsForUser(user.id);
+  }
+
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a new avatar for the chat',
+    type: AvatarUploadDto,
+  })
+  @ApiParam({ name: 'chatId', type: 'integer', required: true })
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('change-avatar/:chatId')
+  async uploadFile(
+    @UploadedFile() file: AvatarUploadDto['file'],
+    @Req() req: Request & { user: User },
+    @Param('chatId', ParseIntPipe) chatId: Chatroom['id']
+  ) {
+    if (file === undefined) {
+      throw new BadRequestException();
+    }
+    const chat = await this.chatService.findOne(chatId);
+    if (!chat) {
+      throw new NotFoundException();
+    }
+    const userInChat = chat.users.find((u) => u.id === req.user.id);
+    if (!userInChat) {
+      throw new UnauthorizedException();
+    }
+    return await this.chatService.uploadAvatar(chatId, file);
   }
 }
