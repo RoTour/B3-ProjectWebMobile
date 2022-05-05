@@ -1,18 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import {
-  Alert,
-  Button,
-  Image,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Image, Platform, SafeAreaView, ScrollView, Text, ToastAndroid, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../App';
 import { useNavigation } from '@react-navigation/native';
@@ -21,11 +8,12 @@ import { AppCss } from '../../../styles';
 import { unauthorized, unauthorizedEffect } from '../../../interceptors/unauthorized.interceptor';
 import { useAxiosInterceptors } from '../../../hooks/state/AxiosInterceptors';
 import FAB from '../../common/FAB/FAB';
-import Modal from 'react-native-modal';
 import axios, { AxiosResponse } from 'axios';
 import { CreateChatDto } from '@projetweb-b3/dto';
 import { environnement } from '../../../../environnement';
 import { JwtHeaderInterceptor } from '../../../interceptors/jwt-header.interceptor';
+import GroupCreationModal from './GroupCreationModal';
+import GroupJoinModal from './GroupJoinModal';
 
 type RoomsScreenProp = NativeStackNavigationProp<RootStackParamList, 'Rooms'>;
 
@@ -59,18 +47,9 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
     axios.get(`${ environnement.apiBaseUrl }/user/rooms`).then((response: AxiosResponse<Chatroom[]>) => {
       setRooms(response.data);
     }).catch((error) => {
-      console.log('Fetch rooms failed', error);
       notify(error.message);
-      if (error.response.status === 401) {
-        unauthorized(error, navigation);
-      }
-      // navigation.replace('Login');
+      if (error.response.status === 401) unauthorized(error, navigation);
     });
-    // return [
-    //   { id: 1, title: 'Room 1', thumbnailUrl: '' },
-    //   { id: 2, title: 'Homies Crew', thumbnailUrl: '' },
-    //   { id: 3, title: 'NSFW channel - Dont question it UHH', thumbnailUrl: '' },
-    // ];
   }, [navigation]);
 
   const selectRoom = (room: Chatroom) => {
@@ -135,73 +114,14 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
   };
 
   return <SafeAreaView style={ AppCss.bg }>
-    <View>
-      <Modal isVisible={ showCreationModal }>
-        <View style={ [styles.modalContainer, AppCss.rounded] }>
-          <View style={ [AppCss.flexRow, AppCss.flexCenter] }>
-            <TouchableOpacity onPress={ () => setCreateOrJoin('create') } style={ AppCss.expand }>
-              <Text style={ [AppCss.centerText, createOrJoin === 'create' ? { fontWeight: '800' } : null] }>Create
-                Group</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={ () => setCreateOrJoin('join') } style={ AppCss.expand }>
-              <Text style={ [AppCss.centerText, createOrJoin === 'join' ? { fontWeight: '800' } : null] }>Join
-                Group</Text>
-            </TouchableOpacity>
-          </View>
-          { createOrJoin === 'create' && <View style={ [AppCss.expand, AppCss.flexCenter, AppCss.fullWidth] }>
-            <Text style={ { alignSelf: 'flex-start' } }>Create a new group</Text>
-            <TextInput
-              placeholder="Group Name"
-              value={ newGroupName }
-              style={ [styles.input, AppCss.rounded, AppCss.fullWidth] }
-              onChangeText={ setNewGroupName }/>
-          </View> }
-          { createOrJoin === 'join' && <View style={ [AppCss.expand, AppCss.flexCenter, AppCss.fullWidth] }>
-            <Text style={ { alignSelf: 'flex-start' } }>Join a group</Text>
-            <TextInput
-              placeholder="Group ID"
-              onChangeText={ value => {
-                const numbers = value.match(/\d+/g)?.join('');
-                if (numbers) setJoinGroupID(+numbers);
-              } }
-              style={ [styles.input, AppCss.rounded, AppCss.fullWidth] }
-            />
-          </View> }
+    <GroupCreationModal createOrJoin={ createOrJoin } setCreateOrJoin={ setCreateOrJoin }
+                        showCreationModal={ showCreationModal } setShowCreationModal={ setShowCreationModal }
+                        createRoom={ createRoom }
+                        joinRoom={ joinRoom } setJoinGroupID={ setJoinGroupID } setNewGroupName={ setNewGroupName }
+                        newGroupName={ newGroupName }/>
 
-          <View style={ styles.buttons }>
-            <View style={ AppCss.expand }>
-              <Button title="Cancel" onPress={ () => setShowCreationModal(false) }/>
-            </View>
-            <View style={ AppCss.expand }>
-              { createOrJoin === 'create' && <Button title="Create Room" onPress={ createRoom }/> }
-              { createOrJoin === 'join' && <Button title="Join Room" onPress={ joinRoom }/> }
-              {/*<Button title="Create Group" onPress={ () => createRoom() }/>*/ }
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </View>
+    <GroupJoinModal leaveGroup={ leaveGroup } roomToLeave={ roomToLeave } setRoomToLeave={ setRoomToLeave }/>
 
-    <View>
-      <Modal isVisible={ roomToLeave !== null }>
-        <View style={ [styles.modalContainer, AppCss.rounded, { height: '20%' }] }>
-          <View style={ [AppCss.expand, AppCss.flexCenter, AppCss.fullWidth] }>
-            <Text style={ { alignSelf: 'flex-start', marginStart: 10, fontSize: 18 } }>
-              Do you really want to leave the room "{ roomToLeave?.title }"?
-            </Text>
-          </View>
-
-          <View style={ styles.buttons }>
-            <View style={ AppCss.expand }>
-              <Button title="Cancel" onPress={ () => setRoomToLeave(null) }/>
-            </View>
-            <View style={ AppCss.expand }>
-              <Button title="Leave group" onPress={ () => leaveGroup() }/>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </View>
 
     <ScrollView>
       { rooms.map((room, idx) => {
@@ -216,31 +136,6 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
     <FAB onPress={ () => setShowCreationModal(true) }/>
   </SafeAreaView>;
 };
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    backgroundColor: 'white',
-    height: '50%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  buttons: {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'space-around',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    color: '#000',
-    borderColor: '#ccc',
-    padding: 10,
-    margin: 10,
-  },
-});
 
 export default RoomSelection;
 
