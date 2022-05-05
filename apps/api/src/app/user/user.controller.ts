@@ -10,12 +10,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import {
-  CreateUserDto,
-  JwtUserContent,
-  SetNameDto,
-  UserBanDto,
-} from '@projetweb-b3/dto';
+import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
 import type { Request, Response } from 'express';
 import { AbilityFactory, Actions } from '../auth/ability/ability.factory';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -25,8 +20,9 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(
     private userService: UserService,
-    private abilityFactory: AbilityFactory
-  ) {}
+    private abilityFactory: AbilityFactory,
+  ) {
+  }
 
   @Get('/')
   @UseGuards(JwtAuthGuard)
@@ -34,7 +30,7 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request & { user: JwtUserContent },
     @Query('page', ParseIntPipe) page: number,
-    @Query('search') search: string
+    @Query('search') search: string,
   ) {
     const user = this.abilityFactory.defineAbility(req.user);
     if (user.cannot(Actions.MANAGE, 'User')) {
@@ -55,7 +51,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   banUser(
     @Body() banDto: UserBanDto,
-    @Req() req: Request & { user: JwtUserContent }
+    @Req() req: Request & { user: JwtUserContent },
   ) {
     const user = this.abilityFactory.defineAbility(req.user);
     if (user.cannot(Actions.MANAGE, 'User')) {
@@ -68,7 +64,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   unbanUser(
     @Body() unbanDto: UserBanDto,
-    @Req() req: Request & { user: JwtUserContent }
+    @Req() req: Request & { user: JwtUserContent },
   ) {
     const user = this.abilityFactory.defineAbility(req.user);
     if (user.cannot(Actions.MANAGE, 'User')) {
@@ -81,8 +77,17 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   setName(
     @Body() setNameDto: SetNameDto,
-    @Req() req: Request & { user: JwtUserContent }
+    @Req() req: Request & { user: JwtUserContent },
   ) {
     return this.userService.setName(setNameDto, req.user);
+  }
+
+  @Get('/rooms')
+  @UseGuards(JwtAuthGuard)
+  async getRooms(
+    @Req() req: Request & { user: JwtUserContent },
+  ) {
+    console.log(req.user);
+    return this.userService.getRooms(req.user);
   }
 }

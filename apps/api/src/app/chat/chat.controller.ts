@@ -30,13 +30,14 @@ import { Chatroom, User } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
-import { CreateChatDto } from './dto/CreateChatDto';
+import { CreateChatDto } from '@projetweb-b3/dto';
 
 class Chat implements Chatroom {
   @ApiProperty()
   id!: number;
   @ApiProperty()
   title!: string;
+  thumbnailUrl = '';
 }
 
 @ApiBearerAuth()

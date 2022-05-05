@@ -44,6 +44,11 @@ export const AppCss = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
   },
+  flexCenter: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   rounded: {
     borderRadius: 10,
   },
@@ -63,5 +68,8 @@ export const AppCss = StyleSheet.create({
   justifyEnd: {
     justifyContent: 'flex-end',
     alignItems: undefined,
+  },
+  fullWidth: {
+    width: '100%',
   },
 });
