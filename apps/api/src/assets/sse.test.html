@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSE Test</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sse.js@0.5.0/lib/sse.min.js"></script>
+		<style>
+			@keyframes blink {
+				0% { opacity: 0; background-color: aqua; }
+				100% { opacity: 1; background-color: unset;}
+			}
+			.blink {
+				animation: blink 500ms ease-in forwards;
+			}
+			.card {
+				margin:1rem;
+				padding:1rem;
+				border:1px solid black;
+			}
+			.card-user{
+				display:flex;align-items:center;
+			}
+		</style>
+  </head>
+  <body>
+		<div>
+			<label>
+				Bearer
+				<input id="token" type="text" placeholder="Your token" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjEsImlhdCI6MTY1MTc4NTI3NiwiZXhwIjoxNjUxNzg4ODc2fQ.WDC1aEJ5ANyxzduawnxC04NkLyIEAFNJQLVcLP6xsh4">
+			</label>
+
+			<button onclick="connect()">Connect (After token set-up)</button>
+    <button onclick="sendMockMessage()">new message?</button>
+    <output></output>
+
+    <script>
+      function sendMockMessage() {
+        fetch('/api/message', {
+          method: 'POST',
+          headers: getHeaders(),
+        });
+      }
+    </script>
+
+    <script>
+      var output = document.querySelector('output');
+      function showMessage(message) {
+				const card =document.createElement('div');
+				card.classList.add('card');
+				card.classList.add('blink');
+				const cardUser =document.createElement('div');
+				cardUser.classList.add('card-user');
+				cardUser.innerHTML = `<img src="${message.sender.avatarUrl}" width="40" height="40" />
+						<b>${message.sender.name}</b>`
+				card.appendChild(cardUser);
+				const cardBody =document.createElement('p');
+				cardBody.innerHTML = message.text;
+				card.appendChild(cardBody);
+				output.prepend(card);
+      }
+    </script>
+
+    <script>
+			function connect() {
+				if (window.connection) {
+					window.connection.close();
+				}
+				var source = new SSE('/api/message/listen/1', {
+					headers: getHeaders()
+				});
+				window.connection = source;
+				source.withCredentials = true;
+				source.addEventListener('open', function (e) {
+					console.log(e);
+					output.innerHTML = '<br /> connecting...';
+				});
+				source.addEventListener('message', function (data) {
+					console.log(data);
+					JSON.parse(data.data).messages.forEach((element) => {
+						showMessage(element);
+					});
+				});
+				source.addEventListener('error', function (e) {
+					console.error(e);
+					output.innerHTML = '<br /> error: ' + e.message;
+					setTimeout(function () {
+						connect();
+					}, 3000)
+				});
+				source.stream();
+			}
+
+			function getHeaders() {
+				return {
+						Authorization: `Bearer ${document.querySelector('#token').value}`,
+					}
+			}
+    </script>
+  </body>
+</html>
