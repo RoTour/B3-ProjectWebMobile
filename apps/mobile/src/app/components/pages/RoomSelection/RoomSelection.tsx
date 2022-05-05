@@ -28,6 +28,7 @@ import axios, { AxiosResponse } from 'axios';
 import { CreateChatDto } from '@projetweb-b3/dto';
 import { environnement } from '../../../../environnement';
 import { JwtHeaderInterceptor } from '../../../interceptors/jwt-header.interceptor';
+import Room from '../Room/Room';
 
 
 type RoomsScreenProp = NativeStackNavigationProp<RootStackParamList, 'Rooms'>;
@@ -47,6 +48,7 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
   const navigation = useNavigation<RoomsScreenProp>();
   const [rooms, setRooms] = useState<Chatroom[]>([]);
   const [showCreationModal, setShowCreationModal] = useState<boolean>(false);
+  const [roomToLeave, setRoomToLeave] = useState<Chatroom | null>(null);
   const [newGroupName, setNewGroupName] = useState<string>('');
 
   const { setUnauthorized, resetUnauthorized } = useAxiosInterceptors((state) => ({
@@ -129,6 +131,19 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
     }, [navigation, resetUnauthorized, setUnauthorized],
   );
 
+  function leaveGroup() {
+    if (!roomToLeave) return;
+    const payload = { chatId: roomToLeave?.id };
+    axios.post(`${ environnement.apiBaseUrl }/chat/leave`, payload)
+      .then(() => {
+        setRoomToLeave(null);
+        fetchRooms();
+      })
+      .catch((err) => {
+        notify(err.message);
+      });
+  }
+
   return <SafeAreaView style={ AppCss.bg }>
     <View>
       <Modal isVisible={ showCreationModal }>
@@ -154,9 +169,32 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
         </View>
       </Modal>
     </View>
+
+    <View>
+      <Modal isVisible={ roomToLeave !== null }>
+        <View style={ [styles.modalContainer, AppCss.rounded, { height: '20%' }] }>
+          <View style={ [AppCss.expand, AppCss.flexCenter, AppCss.fullWidth] }>
+            <Text style={ { alignSelf: 'flex-start', marginStart: 10, fontSize: 18 } }>
+              Do you really want to leave the room "{ roomToLeave?.title }"?
+            </Text>
+          </View>
+
+          <View style={ styles.buttons }>
+            <View style={ AppCss.expand }>
+              <Button title="Cancel" onPress={ () => setRoomToLeave(null) }/>
+            </View>
+            <View style={ AppCss.expand }>
+              <Button title="Leave group" onPress={ () => leaveGroup() }/>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+
     <ScrollView>
       { rooms.map((room, idx) => {
-        return <TouchableOpacity style={ AppCss.flexRow } onPress={ () => selectRoom(room) } key={ idx }>
+        return <TouchableOpacity style={ AppCss.flexRow } onPress={ () => selectRoom(room) } key={ idx }
+                                 onLongPress={ () => setRoomToLeave(room) }>
           <Image style={ [AppCss.iconImage, AppCss.margin] } source={ require('./default-room-img.jpeg') }/>
           <Text style={ [AppCss.white, AppCss.bold, AppCss.bigText, AppCss.overflowHidden, AppCss.expand] }
                 numberOfLines={ 1 } ellipsizeMode={ 'tail' }>{ room.title }</Text>
