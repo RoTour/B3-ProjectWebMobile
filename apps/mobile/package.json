@@ -17,6 +17,9 @@
     "react-native-modal": "*",
     "react-native-vector-icons": "*",
     "zustand": "*",
-    "@nestjs/swagger": "*"
+    "@nestjs/swagger": "*",
+    "multer": "*",
+    "react-native-screens": "*",
+    "react-native-safe-area-context": "*"
   }
 }
