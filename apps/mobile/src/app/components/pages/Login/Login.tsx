@@ -20,6 +20,8 @@ const Login: FC<LoginProps> = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
+
   const [error, setError] = useState<string>('');
 
   const [route, setRoute] = useState<'login' | 'register'>('login');
@@ -57,8 +59,8 @@ const Login: FC<LoginProps> = () => {
       email: email.toLowerCase(),
       password,
       confirmPassword,
-      name: '',
-      username: '',
+      name: username,
+      username: username.toLowerCase(),
     };
 
     axios.post(`${ environnement.apiBaseUrl }/auth/register`, payload)
@@ -87,32 +89,37 @@ const Login: FC<LoginProps> = () => {
       <Text style={ styles.error }>{ error }</Text>
     </View>
     <View style={ styles.form }>
+
       <Text style={ styles.label }>Email</Text>
-      <View>
-        <TextInput
-          placeholder="Email"
-          value={ email }
-          style={ styles.input }
-          onChangeText={ setEmail }/>
-      </View>
+      <TextInput
+        placeholder="Email"
+        value={ email }
+        style={ styles.input }
+        onChangeText={ setEmail }/>
+
+      <Text style={ [styles.label, route !== 'register' ? styles.hidden : null] }>Username</Text>
+      <TextInput
+        placeholder="Username"
+        value={ username }
+        style={ [styles.input, route !== 'register' ? styles.hidden : null] }
+        onChangeText={ setUsername }/>
+
       <Text style={ styles.label }>Password</Text>
-      <View>
-        <TextInput
-          placeholder={ 'Password' }
-          secureTextEntry={ true }
-          value={ password }
-          style={ styles.input }
-          onChangeText={ setPassword }/>
-      </View>
+      <TextInput
+        placeholder={ 'Password' }
+        secureTextEntry={ true }
+        value={ password }
+        style={ styles.input }
+        onChangeText={ setPassword }/>
+
       <Text style={ [styles.label, route !== 'register' ? styles.hidden : null] }>Retype your password</Text>
-      <View>
-        <TextInput
-          placeholder={ 'Password' }
-          secureTextEntry={ true }
-          value={ confirmPassword }
-          style={ [styles.input, route !== 'register' ? styles.hidden : null] }
-          onChangeText={ setConfirmPassword }/>
-      </View>
+      <TextInput
+        placeholder={ 'Password' }
+        secureTextEntry={ true }
+        value={ confirmPassword }
+        style={ [styles.input, route !== 'register' ? styles.hidden : null] }
+        onChangeText={ setConfirmPassword }/>
+
       <View>
         <TouchableOpacity style={ styles.loginScreenButton }
                           onPress={ route === 'login' ? handleLogin : handleRegister }>

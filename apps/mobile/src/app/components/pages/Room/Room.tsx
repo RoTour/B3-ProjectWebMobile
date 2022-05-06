@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Chatroom, Message } from '@prisma/client';
 import { Button, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../../App';
@@ -20,14 +20,20 @@ const Room: FC<Props> = ({ route }: Props) => {
 
   const [currentMsg, setCurrentMsg] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 0), text: 'Hola', userId: 2 },
-    { id: 2, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 11), text: 'Quetal', userId: 2 },
-    { id: 3, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 14), text: 'Affogato', userId: 3 },
+    { id: 1, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 0), text: 'Hello I m React-native', userId: 2 },
+    {
+      id: 2,
+      chatroomId: 1,
+      createdAt: new Date(2022, 3, 11, 11, 11),
+      text: 'Im one of the most used libraries in the world',
+      userId: 2,
+    },
+    { id: 3, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 14), text: '*Report as spam*', userId: 3 },
   ]);
   const [user, setUser] = useState<JwtUserContent | undefined>(undefined);
 
 
-  const sendMessage = () => {
+  const sendMessage = useCallback(() => {
     if (!user) return;
     setMessages(prevState => [...prevState, {
       id: Math.max(...prevState.map(it => it.id)) + 1,
@@ -37,7 +43,7 @@ const Room: FC<Props> = ({ route }: Props) => {
       userId: user.id,
     }]);
     setCurrentMsg('');
-  };
+  }, [currentMsg, user]);
 
   useEffect(() => {
     axios.get(`${ environnement.apiBaseUrl }/auth`)
