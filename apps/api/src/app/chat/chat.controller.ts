@@ -34,9 +34,7 @@ import { Chatroom, User } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
-import { AddUserToChatDto } from './dto/AddUserToChat.dto';
-import { AvatarUploadDto } from './dto/AvatarUpload.dto';
-import { CreateChatDto } from './dto/CreateChatDto';
+import { AddUserToChatDto, AvatarUploadDto, CreateChatDto } from '@projetweb-b3/dto';
 import { Chat } from './schemas/Chat.schema';
 
 @ApiBearerAuth()
@@ -50,7 +48,7 @@ import { Chat } from './schemas/Chat.schema';
 export class ChatController {
   constructor(
     private readonly chatService: ChatService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
   ) {}
 
   @ApiCreatedResponse({ description: 'Created', type: Chat })
@@ -63,7 +61,7 @@ export class ChatController {
   @Post('/')
   async createChat(
     @Body() body: CreateChatDto,
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
@@ -82,7 +80,7 @@ export class ChatController {
   @Post('/join')
   async joinChat(
     @Body('chatId', ParseIntPipe) chatId: AddUserToChatDto['chatId'],
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
@@ -97,7 +95,7 @@ export class ChatController {
   @Post('/leave')
   async leaveChat(
     @Body('chatId', ParseIntPipe) chatId: Chatroom['id'],
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const user = await this.userService.findOneById(req.user.id);
     if (!user) {
@@ -129,7 +127,7 @@ export class ChatController {
   async uploadFile(
     @UploadedFile() file: AvatarUploadDto['file'],
     @Req() req: Request & { user: User },
-    @Param('chatId', ParseIntPipe) chatId: Chatroom['id']
+    @Param('chatId', ParseIntPipe) chatId: Chatroom['id'],
   ) {
     if (file === undefined) {
       throw new BadRequestException();

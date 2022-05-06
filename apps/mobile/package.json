@@ -16,7 +16,7 @@
     "class-validator": "*",
     "@react-native-async-storage/async-storage": "*",
     "@prisma/client": "*",
-    "zustand": "*"
+    "zustand": "*",
     "@prisma/client": "*",
     "react-native-modal": "*",
     "react-native-vector-icons": "*",
