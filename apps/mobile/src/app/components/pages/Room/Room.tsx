@@ -63,6 +63,7 @@ const Room: FC<Props> = ({ route }: Props) => {
     });
     return () => {
       src?.removeAllListeners();
+      src?.close();
     };
   }, [room.id]);
 
