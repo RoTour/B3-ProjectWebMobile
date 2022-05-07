@@ -17,13 +17,11 @@
     "@react-native-async-storage/async-storage": "*",
     "@prisma/client": "*",
     "zustand": "*",
-    "@prisma/client": "*",
     "react-native-modal": "*",
     "react-native-vector-icons": "*",
-    "zustand": "*",
     "@nestjs/swagger": "*",
     "multer": "*",
-    "react-native-screens": "*",
-    "react-native-safe-area-context": "*"
+    "sse.js": "*",
+    "react-native-event-source": "*"
   }
 }

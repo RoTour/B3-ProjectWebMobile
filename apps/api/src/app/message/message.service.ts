@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Chatroom } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
+import { JwtUserContent, SendMessageDto } from '@projetweb-b3/dto';
 
 @Injectable()
 export class MessageService {
@@ -9,7 +10,7 @@ export class MessageService {
   async __mockData() {
     return this.prisma.message.create({
       data: {
-        text: `Hello! (${Math.random()})`,
+        text: `Hello! (${ Math.random() })`,
         chatroomId: 1,
         senderId: 1,
       },
@@ -62,6 +63,17 @@ export class MessageService {
             username: true,
           },
         },
+      },
+    });
+  }
+
+  async sendMessage(sendMsgDto: SendMessageDto, user: JwtUserContent) {
+    console.log(`Nest: should add message "${ sendMsgDto.text }" to chat ${ sendMsgDto.chatroomId }`);
+    return this.prisma.message.create({
+      data: {
+        text: sendMsgDto.text,
+        chatroomId: sendMsgDto.chatroomId,
+        senderId: user.id,
       },
     });
   }

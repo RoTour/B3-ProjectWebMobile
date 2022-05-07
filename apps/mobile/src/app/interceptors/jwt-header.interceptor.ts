@@ -6,7 +6,6 @@ export const JwtHeaderInterceptor = () => {
   console.log('Setting up Jwt interceptor');
   axios.interceptors.request.use(async (config) => {
     const token = await AsyncStorage.getItem(STORAGE_KEYS.authToken);
-    console.log('Sending reaqest with token : ', token);
     if (token) {
       config.headers = {
         Authorization: `Bearer ${ token }`,

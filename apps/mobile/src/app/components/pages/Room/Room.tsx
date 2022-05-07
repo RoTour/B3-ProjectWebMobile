@@ -7,7 +7,13 @@ import { AppCss } from '../../../styles';
 import ChatBubble from './ChatBubble';
 import axios from 'axios';
 import { environnement } from '../../../../environnement';
-import { JwtUserContent } from '@projetweb-b3/dto';
+import { JwtUserContent, SendMessageDto } from '@projetweb-b3/dto';
+import RNEventSource from 'react-native-event-source';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from '../../../local-storage-keys';
+import Utils from '../../../utils/arrays';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const SSE_LIB = require('sse.js');
 
 export type ChatroomProps = {
   room: Chatroom
@@ -19,31 +25,46 @@ const Room: FC<Props> = ({ route }: Props) => {
   const room = route.params.room;
 
   const [currentMsg, setCurrentMsg] = useState<string>('');
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 0), text: 'Hello I m React-native', userId: 2 },
-    {
-      id: 2,
-      chatroomId: 1,
-      createdAt: new Date(2022, 3, 11, 11, 11),
-      text: 'Im one of the most used libraries in the world',
-      userId: 2,
-    },
-    { id: 3, chatroomId: 1, createdAt: new Date(2022, 3, 11, 11, 14), text: '*Report as spam*', userId: 3 },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [user, setUser] = useState<JwtUserContent | undefined>(undefined);
 
 
   const sendMessage = useCallback(() => {
     if (!user) return;
-    setMessages(prevState => [...prevState, {
-      id: Math.max(...prevState.map(it => it.id)) + 1,
-      chatroomId: 1,
-      createdAt: new Date(),
+    console.log('current msg', currentMsg);
+    const payload: SendMessageDto = {
+      chatroomId: room.id,
       text: currentMsg,
-      userId: user.id,
-    }]);
+    };
+    axios.post(`${ environnement.apiBaseUrl }/message/send`, payload)
+      .then()
+      .catch((error) => {
+        console.log('error : ', error);
+      });
     setCurrentMsg('');
-  }, [currentMsg, user]);
+  }, [currentMsg, room.id, user]);
+
+  useEffect(() => {
+    console.log('connecting');
+    let src: RNEventSource | undefined;
+    const msgListener = (event: any) => {
+      const data = JSON.parse(event?.data);
+      setMessages(prevState => [...prevState, ...data?.messages]);
+      console.log('Ro connect', data?.messages);
+    };
+    AsyncStorage.getItem(STORAGE_KEYS.authToken).then(token => {
+      if (!token) return;
+      const headers = {
+        'Authorization': `Bearer ${ token }`,
+      };
+      console.log(`chatroom url: ${ environnement.apiBaseUrl }/message/listen/${ room.id }`);
+      src = new RNEventSource(`${ environnement.apiBaseUrl }/message/listen/${ room.id }`, { headers });
+      src.addEventListener('message', msgListener);
+    });
+    return () => {
+      src?.removeAllListeners();
+    };
+  }, [room.id]);
 
   useEffect(() => {
     axios.get(`${ environnement.apiBaseUrl }/auth`)
@@ -56,12 +77,17 @@ const Room: FC<Props> = ({ route }: Props) => {
       });
   }, []);
 
+  const sendTestMessage = () => {
+    console.log('sendTestMessage');
+    return axios.post(`${ environnement.apiBaseUrl }/message`, {});
+  };
+
   return <SafeAreaView style={ [AppCss.bg] }>
     <ScrollView contentContainerStyle={ [AppCss.flexColumn, AppCss.justifyEnd, AppCss.expand, AppCss.bigMargin] }>
-      { user && messages.sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map(message => {
+      { user && Utils.removeDuplicates(messages, (mess) => mess.id).sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map(message => {
         return <ChatBubble
           key={ message.id }
-          orientation={ user.id === message.userId ? 'right' : 'left' }
+          orientation={ user.id === message.senderId ? 'right' : 'left' }
           text={ message.text }/>;
       }) }
     </ScrollView>
@@ -75,7 +101,7 @@ const Room: FC<Props> = ({ route }: Props) => {
         <Text style={ AppCss.white }>Send</Text>
       </TouchableOpacity>
     </View>
-    <Button title={ 'Debug' } onPress={ () => console.log(messages) }/>
+    <Button title={ 'Debug' } onPress={ () => sendTestMessage() }/>
   </SafeAreaView>;
 };
 

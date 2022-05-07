@@ -44,7 +44,7 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
   }));
 
   const fetchRooms = useCallback(() => {
-    axios.get(`${ environnement.apiBaseUrl }/user/rooms`).then((response: AxiosResponse<Chatroom[]>) => {
+    return axios.get(`${ environnement.apiBaseUrl }/user/rooms`).then((response: AxiosResponse<Chatroom[]>) => {
       setRooms(response.data);
     }).catch((error) => {
       notify(error.message);
@@ -89,7 +89,9 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
     axios.post(`${ environnement.apiBaseUrl }/chat/leave`, payload)
       .then(() => {
         setRoomToLeave(null);
-        fetchRooms();
+        fetchRooms().catch((err) => {
+          notify(err.message);
+        });
       })
       .catch((err) => {
         notify(err.message);
