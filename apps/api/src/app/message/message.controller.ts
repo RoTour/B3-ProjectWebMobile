@@ -51,8 +51,6 @@ export class MessageController {
     let firstLoad = true;
     let lastId = 0;
 
-    console.log(`should listen to ${ chatId }`);
-
     return interval(1000).pipe(
       concatMap(async () => {
         if (firstLoad) {

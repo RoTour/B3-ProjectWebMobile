@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { Chatroom, Message } from '@prisma/client';
+import { Chatroom } from '@prisma/client';
 import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../../App';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,7 +7,7 @@ import { AppCss } from '../../../styles';
 import ChatBubble from './ChatBubble';
 import axios from 'axios';
 import { environnement } from '../../../../environnement';
-import { JwtUserContent, SendMessageDto } from '@projetweb-b3/dto';
+import { JwtUserContent, MessageDataDto, SendMessageDto } from '@projetweb-b3/dto';
 import RNEventSource from 'react-native-event-source';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../../../local-storage-keys';
@@ -24,7 +24,7 @@ const Room: FC<Props> = ({ route }: Props) => {
   const room = route.params.room;
 
   const [currentMsg, setCurrentMsg] = useState<string>('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<MessageDataDto[]>([]);
   const [user, setUser] = useState<JwtUserContent | undefined>(undefined);
   const scrollViewRef = useRef<ScrollView>();
 
@@ -48,7 +48,7 @@ const Room: FC<Props> = ({ route }: Props) => {
     console.log('connecting');
     let src: RNEventSource | undefined;
     const msgListener = (event: any) => {
-      const data = JSON.parse(event?.data);
+      const data: { messages: MessageDataDto[] } = JSON.parse(event?.data);
       setMessages(prevState => [...prevState, ...data?.messages]);
       console.log('Ro connect', data?.messages);
     };
@@ -85,11 +85,13 @@ const Room: FC<Props> = ({ route }: Props) => {
       // @ts-ignore
                 ref={ scrollViewRef }
                 onContentSizeChange={ () => scrollViewRef.current?.scrollToEnd({ animated: false }) }>
-      { user && Utils.removeDuplicates(messages, (mess) => mess.id).sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map(message => {
+      { user && Utils.removeDuplicates(messages, (mess) => mess.id).sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map((message: MessageDataDto) => {
         return <ChatBubble
           key={ message.id }
           orientation={ user.id === message.senderId ? 'right' : 'left' }
-          text={ message.text }/>;
+          text={ message.text }
+          senderName={ message.sender.username }
+        />;
       }) }
       <View style={ { height: 20 } }></View>
     </ScrollView>

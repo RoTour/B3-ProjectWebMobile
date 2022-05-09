@@ -1,3 +1,4 @@
+import { Message } from '@prisma/client';
 import { IsInt, IsString } from 'class-validator';
 import { defaultValidationOptions } from './validation-util';
 
@@ -8,3 +9,5 @@ export class SendMessageDto {
   @IsInt(defaultValidationOptions)
   chatroomId!: number;
 }
+
+export type MessageDataDto = Message & { sender: { id: number, name: string, username: string, avatarUrl: string } }
