@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   ForbiddenException,
   NotFoundException,
@@ -14,6 +15,7 @@ import { Chatroom, User } from '@prisma/client';
 import { concatMap, interval } from 'rxjs';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MessageService } from './message.service';
+import { JwtUserContent, SendMessageDto } from '@projetweb-b3/dto';
 
 @ApiTags('message')
 @UseGuards(JwtAuthGuard)
@@ -26,10 +28,16 @@ export class MessageController {
     return await this.messageService.__mockData();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('/send')
+  async sendMessage(@Body() sendMsgDto: SendMessageDto, @Req() req: Request & { user: JwtUserContent }) {
+    return await this.messageService.sendMessage(sendMsgDto, req.user);
+  }
+
   @Sse('/listen/:chatId')
   async listen(
     @Param('chatId', ParseIntPipe) chatId: Chatroom['id'],
-    @Req() req: Request & { user: User }
+    @Req() req: Request & { user: User },
   ) {
     const chat = await this.messageService.getChat(chatId);
     if (!chat) {
@@ -43,25 +51,25 @@ export class MessageController {
     let firstLoad = true;
     let lastId = 0;
 
-    return interval(2000).pipe(
+    return interval(1000).pipe(
       concatMap(async () => {
         if (firstLoad) {
           firstLoad = false;
           const messages = await this.messageService.getMessages(chatId);
-          lastId = messages[messages.length - 1].id;
+          lastId = messages[messages.length - 1]?.id ?? -1;
           const result = { messages };
           return { data: result };
         }
         const messages = await this.messageService.getMessagesAfter(
           chatId,
-          lastId
+          lastId,
         );
         if (messages.length > 0) {
-          lastId = messages[messages.length - 1].id;
+          lastId = messages[messages.length - 1]?.id ?? -1;
         }
         const result = { messages };
         return { data: result };
-      })
+      }),
     );
   }
 }

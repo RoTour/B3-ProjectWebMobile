@@ -3,7 +3,8 @@ import { HttpStatus } from '../utils/http';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../local-storage-keys';
 
-const unauthorized = (error: AxiosError, navigation: any) => {
+export const unauthorized = (error: AxiosError, navigation: any) => {
+  console.log('unauthorized interceptor');
   if (error.message === 'canceled') return;
   if (error.response && error.response.status === HttpStatus.UNAUTHORIZED) {
     AsyncStorage.removeItem(STORAGE_KEYS.authToken).then(() => {

@@ -7,6 +7,9 @@ export const AppCss = StyleSheet.create({
   bigMargin: {
     margin: 20,
   },
+  bigMarginBottom: {
+    marginBottom: 20,
+  },
   primaryBg: {
     backgroundColor: '#44d62c',
   },
@@ -44,6 +47,15 @@ export const AppCss = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
   },
+  flexCenter: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  flexStretch: {
+    display: 'flex',
+    alignItems: 'stretch',
+  },
   rounded: {
     borderRadius: 10,
   },
@@ -63,5 +75,8 @@ export const AppCss = StyleSheet.create({
   justifyEnd: {
     justifyContent: 'flex-end',
     alignItems: undefined,
+  },
+  fullWidth: {
+    width: '100%',
   },
 });

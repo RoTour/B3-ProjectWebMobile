@@ -1,12 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Chatroom, Prisma, User } from '@prisma/client';
 import { PrismaService } from '@projetweb-b3/database';
-import {
-  CreateUserDto,
-  JwtUserContent,
-  SetNameDto,
-  UserBanDto,
-} from '@projetweb-b3/dto';
+import { CreateUserDto, JwtUserContent, SetNameDto, UserBanDto } from '@projetweb-b3/dto';
 import bcrypt from 'bcrypt';
 
 export type SecuredUser = Omit<User, 'password'>;
@@ -15,7 +10,8 @@ export type SecuredUser = Omit<User, 'password'>;
 export class UserService {
   // private logger = new Logger('UserService');
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {
+  }
 
   secure(user: User): SecuredUser {
     const result: SecuredUser & { password: unknown } = { ...user };
@@ -68,7 +64,7 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<SecuredUser> {
     const password = await bcrypt.hash(
       createUserDto.password,
-      await bcrypt.genSalt()
+      await bcrypt.genSalt(),
     );
     const user = await this.prisma.user.create({
       data: { ...createUserDto, password, banned: false },
@@ -99,5 +95,14 @@ export class UserService {
         where: { id: user.id },
       })
       .then((user: User) => this.secure(user));
+  }
+
+  async getRooms(userJwt: JwtUserContent): Promise<Chatroom[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userJwt.id },
+      include: { chats: true },
+    });
+    if (!user) throw new NotFoundException();
+    return user.chats;
   }
 }

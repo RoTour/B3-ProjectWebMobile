@@ -16,6 +16,12 @@
     "class-validator": "*",
     "@react-native-async-storage/async-storage": "*",
     "@prisma/client": "*",
-    "zustand": "*"
+    "zustand": "*",
+    "react-native-modal": "*",
+    "react-native-vector-icons": "*",
+    "@nestjs/swagger": "*",
+    "multer": "*",
+    "sse.js": "*",
+    "react-native-event-source": "*"
   }
 }
