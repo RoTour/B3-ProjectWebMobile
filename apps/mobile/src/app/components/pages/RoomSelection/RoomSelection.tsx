@@ -14,6 +14,7 @@ import { environnement } from '../../../../environnement';
 import { JwtHeaderInterceptor } from '../../../interceptors/jwt-header.interceptor';
 import GroupCreationModal from './GroupCreationModal';
 import GroupJoinModal from './GroupJoinModal';
+import { useCurrentRoom } from '../../../hooks/state/CurrentRoom';
 
 type RoomsScreenProp = NativeStackNavigationProp<RootStackParamList, 'Rooms'>;
 
@@ -36,7 +37,7 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
   const [newGroupName, setNewGroupName] = useState<string>('');
   const [joinGroupID, setJoinGroupID] = useState<number>(0);
   const [createOrJoin, setCreateOrJoin] = useState<'create' | 'join'>('create');
-
+  const { setRoomId } = useCurrentRoom();
 
   const { setUnauthorized, resetUnauthorized } = useAxiosInterceptors((state) => ({
     setUnauthorized: state.addInterceptor,
@@ -47,13 +48,18 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
     return axios.get(`${ environnement.apiBaseUrl }/user/rooms`).then((response: AxiosResponse<Chatroom[]>) => {
       setRooms(response.data);
     }).catch((error) => {
+      if (error.response.status === 401) {
+        unauthorized(error, navigation);
+        notify('You have been automatically logged out due to inactivity');
+        return;
+      }
       notify(error.message);
-      if (error.response.status === 401) unauthorized(error, navigation);
     });
   }, [navigation]);
 
   const selectRoom = (room: Chatroom) => {
     console.log(room);
+    setRoomId(room.id);
     navigation.navigate('Room', { room });
   };
 
@@ -65,7 +71,10 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
       selectRoom(res.data);
       setShowCreationModal(false);
       setNewGroupName('');
-      fetchRooms();
+      fetchRooms().catch((error) => {
+        notify('An error occurred. Please try again later.');
+        console.log(error);
+      });
     }).catch((err) => {
       notify(err.message);
       navigation.replace('Login');
@@ -73,7 +82,10 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
   };
 
   useEffect(() => {
-    fetchRooms();
+    fetchRooms().catch((error) => {
+      notify('An error occurred. Please try again later.');
+      console.log(error);
+    });
   }, [fetchRooms]);
 
   useEffect(
@@ -107,7 +119,10 @@ const RoomSelection: FC<RoomSelectionProps> = () => {
         setCreateOrJoin('create');
         setJoinGroupID(0);
         setShowCreationModal(false);
-        fetchRooms();
+        fetchRooms().catch((error) => {
+          notify('An error occured. Please try again later.');
+          console.log(error);
+        });
       })
       .catch((err) => {
         notify(err.message);

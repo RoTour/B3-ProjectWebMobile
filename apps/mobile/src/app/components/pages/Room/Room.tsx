@@ -1,6 +1,6 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Chatroom, Message } from '@prisma/client';
-import { Button, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../../App';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppCss } from '../../../styles';
@@ -13,7 +13,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../../../local-storage-keys';
 import Utils from '../../../utils/arrays';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const SSE_LIB = require('sse.js');
 
 export type ChatroomProps = {
   room: Chatroom
@@ -27,6 +26,7 @@ const Room: FC<Props> = ({ route }: Props) => {
   const [currentMsg, setCurrentMsg] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [user, setUser] = useState<JwtUserContent | undefined>(undefined);
+  const scrollViewRef = useRef<ScrollView>();
 
 
   const sendMessage = useCallback(() => {
@@ -78,21 +78,22 @@ const Room: FC<Props> = ({ route }: Props) => {
       });
   }, []);
 
-  const sendTestMessage = () => {
-    console.log('sendTestMessage');
-    return axios.post(`${ environnement.apiBaseUrl }/message`, {});
-  };
 
   return <SafeAreaView style={ [AppCss.bg] }>
-    <ScrollView contentContainerStyle={ [AppCss.flexColumn, AppCss.justifyEnd, AppCss.expand, AppCss.bigMargin] }>
+    <ScrollView contentContainerStyle={ [AppCss.flexColumn, AppCss.justifyEnd, AppCss.bigMargin] }
+                style={ [AppCss.bigMarginBottom, AppCss.expand] }
+      // @ts-ignore
+                ref={ scrollViewRef }
+                onContentSizeChange={ () => scrollViewRef.current?.scrollToEnd({ animated: false }) }>
       { user && Utils.removeDuplicates(messages, (mess) => mess.id).sort(((a, b) => a.createdAt > b.createdAt ? 1 : -1)).map(message => {
         return <ChatBubble
           key={ message.id }
           orientation={ user.id === message.senderId ? 'right' : 'left' }
           text={ message.text }/>;
       }) }
+      <View style={ { height: 20 } }></View>
     </ScrollView>
-    <View style={ [AppCss.flexRow, AppCss.margin] }>
+    <View style={ [AppCss.flexRow] }>
       <TextInput
         style={ [AppCss.input, AppCss.margin, AppCss.rounded, AppCss.expand] }
         placeholder={ 'Text ChatBubble.tsx' }
@@ -102,7 +103,6 @@ const Room: FC<Props> = ({ route }: Props) => {
         <Text style={ AppCss.white }>Send</Text>
       </TouchableOpacity>
     </View>
-    <Button title={ 'Debug' } onPress={ () => sendTestMessage() }/>
   </SafeAreaView>;
 };
 

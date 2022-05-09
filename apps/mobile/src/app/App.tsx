@@ -8,6 +8,7 @@ import Login from './components/pages/Login/Login';
 import RoomSelection from './components/pages/RoomSelection/RoomSelection';
 import Room, { ChatroomProps } from './components/pages/Room/Room';
 import NavigatorWrapper from './NavigatorWrapper';
+import { useCurrentRoom } from './hooks/state/CurrentRoom';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ export type RootStackParamList = {
 };
 
 const App = () => {
+  const { roomId } = useCurrentRoom();
   return (
     <NavigationContainer>
       <NavigatorWrapper Stack={ Stack }>
@@ -36,11 +38,12 @@ const App = () => {
             headerTitleStyle: { color: '#ffffff' },
           } }/>
         <Stack.Screen
-          name="Room"
+          name={ 'Room' }
           component={ Room }
           options={ {
             headerStyle: { backgroundColor: '#080C1E' },
             headerTitleStyle: { color: '#ffffff' },
+            title: `Room #${ roomId }`,
           } }/>
       </NavigatorWrapper>
     </NavigationContainer>
